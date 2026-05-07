@@ -580,6 +580,188 @@ export function AuctionWidget() {
    GALAXY MORPHOLOGY XAI
    ========================================================= */
 /* =========================================================
+   GREENPIPE
+   ========================================================= */
+const GP_STAGES = [
+  { id: 'build',   label: 'build',    duration: '2m 34s' },
+  { id: 'unit',    label: 'test:unit',duration: '1m 48s' },
+  { id: 'int',     label: 'test:int', duration: '2m 11s' },
+  { id: 'deploy',  label: 'deploy',   duration: '0m 52s' },
+  { id: 'agent',   label: '⬡ greenpipe', duration: '' },
+];
+
+const GP_LOG_LINES = [
+  { delay: 0,    text: '→ GreenPipe agent triggered by pipeline #4821', kind: 'info' },
+  { delay: 500,  text: '→ estimating energy via GSF Impact Framework (Teads curve)…', kind: 'info' },
+  { delay: 1100, text: '  E = 0.0028 kWh  (CPU 38% util × 65W TDP × 7.63 min)', kind: 'dim' },
+  { delay: 1700, text: '  I = 287 gCO₂e/kWh  (us-east1 · live grid intensity)', kind: 'dim' },
+  { delay: 2200, text: '  M = 0.00038 gCO₂e  (embodied hardware share)', kind: 'dim' },
+  { delay: 2700, text: '  SCI = ((E × I) + M) / R = 0.804 gCO₂e', kind: 'sci' },
+  { delay: 3300, text: '→ classifying urgency via DistilBERT (INT8)…', kind: 'info' },
+  { delay: 3900, text: '  "feat: add auth middleware"  →  LOW  (conf 94.2%)', kind: 'dim' },
+  { delay: 4500, text: '→ scanning 5 regions for lowest carbon window…', kind: 'info' },
+  { delay: 5100, text: '  europe-west1  03:00 UTC  →  71 gCO₂e/kWh  (−75.3%)', kind: 'ok' },
+  { delay: 5700, text: '→ deferral decision: RECOMMEND  (mode: recommend-only)', kind: 'info' },
+  { delay: 6200, text: '✓ MR comment posted  ·  leaderboard updated  ·  0.804 gCO₂e logged', kind: 'ok' },
+];
+
+export function GreenPipeWidget() {
+  const [stageIdx, setStageIdx] = useState(-1);
+  const [logIdx, setLogIdx] = useState(0);
+  const [running, setRunning] = useState(false);
+  const [logStarted, setLogStarted] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const reset = () => { setStageIdx(-1); setLogIdx(0); setRunning(false); setLogStarted(false); };
+
+  const run = () => {
+    reset();
+    setRunning(true);
+    GP_STAGES.forEach((_, i) => {
+      timerRef.current = setTimeout(() => {
+        setStageIdx(i);
+        if (i === GP_STAGES.length - 1) {
+          setTimeout(() => setLogStarted(true), 200);
+        }
+      }, i * 900 + 300);
+    });
+  };
+
+  useEffect(() => {
+    if (!logStarted) return;
+    if (logIdx >= GP_LOG_LINES.length) { setRunning(false); return; }
+    const delay = logIdx === 0 ? 0 : GP_LOG_LINES[logIdx].delay - GP_LOG_LINES[logIdx - 1].delay;
+    const id = setTimeout(() => setLogIdx((n) => n + 1), delay);
+    return () => clearTimeout(id);
+  }, [logStarted, logIdx]);
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  const done = logIdx >= GP_LOG_LINES.length;
+  const LOG_COLOR: Record<string, string> = {
+    info: 'var(--text-muted)', dim: 'var(--text-faint)',
+    ok: '#4ade80', sci: 'var(--accent)',
+  };
+
+  return (
+    <div className="glass rounded-2xl overflow-hidden" style={{ boxShadow: 'var(--shadow-glass)' }}>
+      {/* Chrome */}
+      <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5">
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ff5f56' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ffbd2e' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#27c93f' }} />
+          </div>
+          <span className="font-mono text-[11px]" style={{ color: 'var(--text-muted)' }}>greenpipe · gitlab-duo-agent · pipeline #4821</span>
+        </div>
+        <button
+          onClick={running ? reset : run}
+          className="font-mono text-[10px] px-3 py-1.5 rounded-md smooth uppercase tracking-[0.12em]"
+          style={{ background: running ? 'transparent' : 'var(--accent)', color: running ? 'var(--text-muted)' : 'var(--bg)', border: `1px solid ${running ? 'var(--border-strong)' : 'var(--accent)'}` }}
+          data-hover>
+          {running ? '■ stop' : stageIdx === -1 ? '▶ run pipeline' : '↺ re-run'}
+        </button>
+      </div>
+
+      {/* Pipeline stages */}
+      <div className="px-5 py-4 border-b flex items-center gap-1 overflow-x-auto" style={{ borderColor: 'var(--border)', background: 'var(--bg-elev)' }}>
+        {GP_STAGES.map((s, i) => {
+          const passed  = stageIdx > i;
+          const active  = stageIdx === i;
+          const pending = stageIdx < i;
+          const isAgent = s.id === 'agent';
+          return (
+            <div key={s.id} className="flex items-center gap-1 flex-shrink-0">
+              <div className="flex flex-col items-center gap-1">
+                <div className="font-mono text-[9px] uppercase tracking-[0.12em] whitespace-nowrap"
+                  style={{ color: passed ? '#4ade80' : active ? 'var(--accent)' : 'var(--text-faint)' }}>
+                  {s.label}
+                </div>
+                <div className="px-3 py-1.5 rounded font-mono text-[9px] smooth"
+                  style={{
+                    background: passed ? 'rgba(74,222,128,0.12)' : active ? 'var(--accent-soft)' : 'var(--bg)',
+                    border: `1px solid ${passed ? '#4ade80' : active ? 'var(--accent)' : 'var(--border)'}`,
+                    color: passed ? '#4ade80' : active ? 'var(--accent)' : 'var(--text-faint)',
+                    minWidth: isAgent ? 88 : 64, textAlign: 'center',
+                  }}>
+                  {passed ? `✓ ${s.duration}` : active ? (isAgent ? 'analyzing…' : 'running…') : s.duration || 'pending'}
+                </div>
+              </div>
+              {i < GP_STAGES.length - 1 && (
+                <div className="w-4 h-px mx-1 flex-shrink-0" style={{ background: stageIdx > i ? '#4ade80' : 'var(--border-strong)' }} />
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="grid md:grid-cols-5 gap-0">
+        {/* Agent log */}
+        <div className="md:col-span-3 p-5 border-b md:border-b-0 md:border-r font-mono text-[11px] leading-[1.7]" style={{ borderColor: 'var(--border)', minHeight: 280 }}>
+          {stageIdx === -1 && (
+            <span style={{ color: 'var(--text-faint)' }}>Click <span style={{ color: 'var(--accent)' }}>run pipeline</span> to simulate a CI run with GreenPipe carbon analysis.</span>
+          )}
+          {stageIdx >= 0 && stageIdx < GP_STAGES.length - 1 && (
+            <span style={{ color: 'var(--text-faint)' }}>Pipeline running — waiting for deploy to complete…</span>
+          )}
+          {logStarted && GP_LOG_LINES.slice(0, logIdx).map((l, i) => (
+            <div key={i} style={{ color: LOG_COLOR[l.kind] }}>{l.text}</div>
+          ))}
+          {running && logStarted && logIdx < GP_LOG_LINES.length && (
+            <span className="inline-block w-2 h-3.5 align-middle" style={{ background: 'var(--accent)', animation: 'blink 1s steps(2) infinite' }} />
+          )}
+        </div>
+
+        {/* SCI breakdown + recommendation */}
+        <div className="md:col-span-2 p-5 flex flex-col gap-4">
+          <div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-3" style={{ color: 'var(--text-muted)' }}>SCI Formula — ISO/IEC 21031:2024</div>
+            <div className="font-mono text-[11px] p-3 rounded-lg mb-3" style={{ background: 'var(--bg-elev)', border: '1px solid var(--border)' }}>
+              <span style={{ color: 'var(--text-faint)' }}>SCI = </span>
+              <span style={{ color: 'var(--text-muted)' }}>((E × I) + M) / R</span>
+            </div>
+            {[
+              ['E · energy', '0.0028 kWh'],
+              ['I · carbon intensity', '287 gCO₂e/kWh'],
+              ['M · embodied', '0.00038 gCO₂e'],
+              ['R · functional unit', '1 pipeline run'],
+            ].map(([k, v]) => (
+              <div key={k as string} className="flex justify-between font-mono text-[10px] border-b py-1" style={{ borderColor: 'var(--border)' }}>
+                <span style={{ color: 'var(--text-muted)' }}>{k}</span>
+                <span style={{ color: done ? 'var(--text-primary)' : 'var(--text-faint)', transition: 'color 0.4s' }}>{v}</span>
+              </div>
+            ))}
+            <div className="flex justify-between font-mono text-[11px] pt-2">
+              <span style={{ color: 'var(--text-muted)' }}>SCI score</span>
+              <span style={{ color: done ? 'var(--accent)' : 'var(--text-faint)', transition: 'color 0.4s', fontWeight: 600 }}>
+                {done ? '0.804 gCO₂e' : '—'}
+              </span>
+            </div>
+          </div>
+
+          {done && (
+            <div className="rounded-lg p-3 font-mono text-[10px] space-y-1" style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)' }}>
+              <div className="text-[9px] uppercase tracking-[0.14em] mb-2" style={{ color: '#4ade80' }}>Deferral Recommendation</div>
+              <div className="flex justify-between"><span style={{ color: 'var(--text-muted)' }}>urgency</span><span>LOW (94.2%)</span></div>
+              <div className="flex justify-between"><span style={{ color: 'var(--text-muted)' }}>target region</span><span>europe-west1</span></div>
+              <div className="flex justify-between"><span style={{ color: 'var(--text-muted)' }}>target window</span><span>03:00 UTC</span></div>
+              <div className="flex justify-between"><span style={{ color: 'var(--text-muted)' }}>carbon savings</span><span style={{ color: '#4ade80' }}>−75.3%</span></div>
+            </div>
+          )}
+
+          {!done && stageIdx === -1 && (
+            <p className="font-mono text-[10px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+              GreenPipe automatically posts a carbon report as a GitLab MR comment after every pipeline. No config needed beyond a webhook.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
    FAIRLEND MINERS
    ========================================================= */
 const FAIRLEND_LINES = [
