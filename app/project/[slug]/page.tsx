@@ -8,6 +8,7 @@ import { PROJECTS, PROJECT_BY_SLUG, Project } from '@/lib/projects-data';
 import { IconSun, IconMoon } from '@/components/icons';
 import {
   GalaxyXAIWidget,
+  FairLendWidget,
   OSMMapWidget,
   ChatAgentWidget,
   CycleGraphWidget,
@@ -41,6 +42,7 @@ type WidgetComponent = React.ComponentType<{ project: Project }>;
 
 const WIDGET_MAP: Record<string, WidgetComponent> = {
   galaxyXai: GalaxyXAIWidget as WidgetComponent,
+  fairLend: FairLendWidget as WidgetComponent,
   osmMap: OSMMapWidget as WidgetComponent,
   chatAgent: ChatAgentWidget as WidgetComponent,
   cycleGraph: CycleGraphWidget as WidgetComponent,

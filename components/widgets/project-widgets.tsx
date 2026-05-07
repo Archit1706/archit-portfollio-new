@@ -579,6 +579,153 @@ export function AuctionWidget() {
 /* =========================================================
    GALAXY MORPHOLOGY XAI
    ========================================================= */
+/* =========================================================
+   FAIRLEND MINERS
+   ========================================================= */
+const FAIRLEND_LINES = [
+  { t: 0,    text: '$ spark-submit fairlend.py --dataset=hmda_2023.csv', kind: 'cmd' },
+  { t: 400,  text: '[INFO] Loading 4 GB HMDA 2023 national dataset…', kind: 'info' },
+  { t: 900,  text: '[INFO] Filtering to Chicago metro area', kind: 'info' },
+  { t: 1300, text: '[OK]   103,481 applications retained after cleaning', kind: 'ok' },
+  { t: 1800, text: '[INFO] Running equal-frequency binning on income…', kind: 'info' },
+  { t: 2300, text: '[BIAS] Standard binning max deviation: 9.63%', kind: 'warn' },
+  { t: 2700, text: '[INFO] Running ε-biased fair binning (Asudeh et al.)…', kind: 'info' },
+  { t: 3300, text: '[BIAS] Fair binning max deviation: 8.00%', kind: 'ok' },
+  { t: 3700, text: '[INFO] Price of Fairness: 29.4%', kind: 'info' },
+  { t: 4100, text: '[INFO] Running FP-Growth association rule mining…', kind: 'info' },
+  { t: 4600, text: '[RULE] high_DTI → denial  conf=0.672  lift=2.81', kind: 'ok' },
+  { t: 5000, text: '[INFO] K-Means clustering audit (k=5)…', kind: 'info' },
+  { t: 5500, text: '[FLAG] 10 cases of disparate impact (4/5ths rule)', kind: 'warn' },
+  { t: 5900, text: '[INFO] Exporting 3 Parquet files (300K+ records)…', kind: 'info' },
+  { t: 6300, text: '✓ Pipeline complete in 4m 12s', kind: 'ok' },
+];
+
+export function FairLendWidget() {
+  const [shown, setShown] = useState(0);
+  const [running, setRunning] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const run = () => {
+    setShown(0);
+    setRunning(true);
+  };
+
+  useEffect(() => {
+    if (!running || shown >= FAIRLEND_LINES.length) {
+      if (shown >= FAIRLEND_LINES.length) setRunning(false);
+      return;
+    }
+    const delay = shown === 0 ? 0 : FAIRLEND_LINES[shown].t - FAIRLEND_LINES[shown - 1].t;
+    timerRef.current = setTimeout(() => setShown((s) => s + 1), delay);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [running, shown]);
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  const done = shown >= FAIRLEND_LINES.length;
+  const COLOR: Record<string, string> = {
+    cmd: 'var(--accent)', info: 'var(--text-muted)', ok: '#4ade80', warn: '#fb923c',
+  };
+
+  return (
+    <div className="glass rounded-2xl overflow-hidden" style={{ boxShadow: 'var(--shadow-glass)' }}>
+      {/* Chrome */}
+      <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5">
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ff5f56' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ffbd2e' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#27c93f' }} />
+          </div>
+          <span className="font-mono text-[11px]" style={{ color: 'var(--text-muted)' }}>fairlend-miners · hmda-2023 · pyspark</span>
+        </div>
+        <button
+          onClick={run}
+          disabled={running}
+          className="font-mono text-[10px] px-3 py-1.5 rounded-md smooth flex items-center gap-2 uppercase tracking-[0.12em]"
+          style={{ background: running ? 'transparent' : 'var(--accent)', color: running ? 'var(--text-muted)' : 'var(--bg)', border: `1px solid ${running ? 'var(--border-strong)' : 'var(--accent)'}` }}
+          data-hover>
+          {running ? '● running…' : shown === 0 ? '▶ run pipeline' : '↺ re-run'}
+        </button>
+      </div>
+
+      <div className="grid md:grid-cols-5 gap-0">
+        {/* Terminal */}
+        <div className="md:col-span-3 p-5 border-b md:border-b-0 md:border-r font-mono text-[11px] leading-6" style={{ borderColor: 'var(--border)', background: 'var(--bg)', minHeight: 320 }}>
+          {shown === 0 && !running && (
+            <span style={{ color: 'var(--text-faint)' }}>Click <span style={{ color: 'var(--accent)' }}>run pipeline</span> to execute the PySpark job.</span>
+          )}
+          {FAIRLEND_LINES.slice(0, shown).map((l, i) => (
+            <div key={i} style={{ color: COLOR[l.kind] }}>{l.text}</div>
+          ))}
+          {running && shown < FAIRLEND_LINES.length && (
+            <span className="inline-block w-2 h-3.5 align-middle ml-1" style={{ background: 'var(--accent)', animation: 'blink 1s steps(2) infinite' }} />
+          )}
+        </div>
+
+        {/* Metrics panel */}
+        <div className="md:col-span-2 p-5 flex flex-col gap-5">
+          {/* Bias comparison */}
+          <div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-3" style={{ color: 'var(--text-muted)' }}>Binning Bias — Max Demographic Deviation</div>
+            <div className="space-y-3">
+              {[
+                { label: 'Standard Binning', value: 9.63, max: 12, color: '#fb923c' },
+                { label: 'Fair Binning (ε-biased)', value: 8.00, max: 12, color: '#4ade80' },
+              ].map(({ label, value, max, color }) => (
+                <div key={label}>
+                  <div className="flex justify-between font-mono text-[10px] mb-1">
+                    <span style={{ color: 'var(--text-muted)' }}>{label}</span>
+                    <span style={{ color }}>{value.toFixed(2)}%</span>
+                  </div>
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-elev)' }}>
+                    <div className="h-full rounded-full" style={{
+                      width: done ? `${(value / max) * 100}%` : '0%',
+                      background: color,
+                      transition: 'width 0.9s cubic-bezier(0.23,1,0.32,1) 0.2s',
+                    }} />
+                  </div>
+                </div>
+              ))}
+              <div className="font-mono text-[10px] pt-1" style={{ color: 'var(--text-faint)' }}>
+                Price of Fairness: <span style={{ color: 'var(--text-muted)' }}>29.4%</span> (unequal bin sizes)
+              </div>
+            </div>
+          </div>
+
+          <hr style={{ borderColor: 'var(--border)', borderTopWidth: 1 }} />
+
+          {/* Key findings */}
+          <div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-3" style={{ color: 'var(--text-muted)' }}>Key Findings</div>
+            <div className="space-y-2 font-mono text-[11px]">
+              {[
+                ['FP-Growth top rule', 'High DTI → denial'],
+                ['Confidence', '67.2%'],
+                ['Lift', '2.81'],
+                ['Disparate impact cases', '10 flagged'],
+                ['Legal rule', '4/5ths threshold'],
+              ].map(([k, v]) => (
+                <div key={k as string} className="flex justify-between border-b py-1" style={{ borderColor: 'var(--border)' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>{k}</span>
+                  <span style={{ color: done ? 'var(--accent)' : 'var(--text-faint)', transition: 'color 0.4s ease' }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {done && (
+            <div className="font-mono text-[10px] leading-relaxed p-3 rounded-lg" style={{ background: 'var(--accent-soft)', color: 'var(--text-muted)', border: '1px solid var(--accent)' }}>
+              <span style={{ color: 'var(--accent)' }}>Finding: </span>
+              Black applicants face significantly higher denial rates than White applicants even within financially similar K-Means clusters.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function GalaxyXAIWidget() {
   const [method, setMethod] = useState<'gradcam' | 'lime' | 'ig' | 'shap'>('gradcam');
   const [arch, setArch] = useState<'resnet18' | 'vgg16' | 'effnet' | 'custom'>('resnet18');
