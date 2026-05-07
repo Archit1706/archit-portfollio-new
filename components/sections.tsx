@@ -10,6 +10,7 @@ import {
   IconLinkedin, IconGithub, IconScholar, IconTerminal, IconTwitter,
 } from './icons';
 import { FairLintWidget } from './fairlint';
+import { GalaxyXAIWidget } from './widgets/project-widgets';
 import { useTheme } from './theme-provider';
 
 /* =========================================================
@@ -209,7 +210,7 @@ function ProjectCard({ kicker, title, body, tags, stats, icon }: { kicker: strin
 export function Work() {
   return (
     <section id="work" className="relative px-6 md:px-10 max-w-[1400px] mx-auto py-24">
-      <SectionHeader idx="02" kicker="featured work" title={<>Tools that <em className="font-serif" style={{ fontStyle: 'italic' }}>prove</em> the thesis.</>} subtitle="Three projects that sit at the intersection of scalable systems and responsible AI — a VS Code fairness debugger, a real-estate platform serving 1,000+ ZIPs, and a year of published research." />
+      <SectionHeader idx="02" kicker="featured work" title={<>Tools that <em className="font-serif" style={{ fontStyle: 'italic' }}>prove</em> the thesis.</>} subtitle="Four projects at the intersection of scalable systems and responsible AI — a VS Code fairness debugger, a galaxy morphology explainability study, a real-estate platform serving 1,000+ ZIPs, and a year of published research." />
 
       <div className="grid md:grid-cols-12 gap-8 mb-16">
         <div className="md:col-span-5">
@@ -236,6 +237,39 @@ export function Work() {
           <FairLintWidget />
           <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
             <IconSparkles size={11} /> interactive demo · click the audit button to run
+          </div>
+        </div>
+      </div>
+
+      <hr className="rule my-16" />
+
+      {/* Galaxy Morphology XAI */}
+      <div className="grid md:grid-cols-12 gap-8 mb-16">
+        <div className="md:col-span-7">
+          <GalaxyXAIWidget />
+          <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
+            <IconSparkles size={11} /> interactive demo · select method + architecture, then run
+          </div>
+        </div>
+        <div className="md:col-span-5">
+          <div className="sticky top-28">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] mb-4" style={{ color: 'var(--text-muted)' }}>
+              <span className="px-2 py-0.5 rounded" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>research</span>
+              <span>· explainability</span>
+            </div>
+            <h3 className="font-serif text-4xl leading-tight tracking-tight mb-4">Galaxy Morphology XAI</h3>
+            <p className="text-[15px] leading-relaxed mb-5" style={{ color: 'var(--text-muted)' }}>
+              A systematic evaluation of post-hoc explainability for astronomical AI — comparing Grad-CAM, LIME, Integrated Gradients, and GradientSHAP across four CNN architectures on Rubin LSST-scale galaxy surveys. No single method wins universally; the right choice depends on architecture, dataset, and the faithfulness criterion the scientist prioritizes.
+            </p>
+            <div className="flex flex-wrap gap-1.5 mb-6">
+              {['PyTorch', 'Captum', 'Grad-CAM', 'LIME', 'GradientSHAP', 'Rubin LSST'].map((t) => <span key={t} className="tag">{t}</span>)}
+            </div>
+            <div className="space-y-1 font-mono text-[11px]">
+              <StatRow k="best accuracy" v="96.1% (ResNet-18)" accent />
+              <StatRow k="best deletion AUC" v="0.32 (Grad-CAM)" />
+              <StatRow k="best insertion AUC" v="0.89 (GradientSHAP)" />
+              <StatRow k="images evaluated" v="10,758" />
+            </div>
           </div>
         </div>
       </div>
@@ -413,6 +447,7 @@ export function Skills() {
    RESEARCH
    ========================================================= */
 const research = [
+  { year: '2025', venue: 'Technical Report · UIC 2025', title: 'Galaxy Morphology Classification with Explainable AI', desc: 'Systematic evaluation of Grad-CAM, LIME, Integrated Gradients, and GradientSHAP across four CNNs on Galaxy10 DECaLS and Galaxy Zoo Evo. Quantitative faithfulness metrics reveal no universal winner — architecture, dataset, and criterion jointly determine the best explanation method.' },
   { year: '2024', venue: 'ICDSA 2024 · Springer', title: 'Ascend.ai', desc: 'Technical exploration of facial expression, tone, and pitch analysis with chatbot guidance for interview preparation.' },
   { year: '2024', venue: 'ICSISCET 2023 · Springer', title: 'Automated Disaster Image Classification', desc: 'Stacked CNN + XGBoost ensemble for earthquake / flood / wildfire / volcano imagery. 95% accuracy, F1 up to 0.96.' },
   { year: '2023', venue: 'NeurIPS 2023 · MASec', title: 'Multi-Agent Simulators for Social Networks', desc: 'Position paper reviewing multiagent security via agent-based models of social networks, bridging public/private platform gaps.' },
@@ -421,7 +456,7 @@ const research = [
 export function Research() {
   return (
     <section id="research" className="relative px-6 md:px-10 max-w-[1400px] mx-auto py-24">
-      <SectionHeader idx="05" kicker="research publications" title={<>Written down, peer-reviewed, <em style={{ fontStyle: 'italic' }}>shipped</em>.</>} subtitle="Three papers across responsible AI, disaster response, and social-network simulation." />
+      <SectionHeader idx="05" kicker="research publications" title={<>Written down, peer-reviewed, <em style={{ fontStyle: 'italic' }}>shipped</em>.</>} subtitle="Four papers across explainable AI for astronomy, responsible AI, disaster response, and social-network simulation." />
       <div className="space-y-0">
         {research.map((r, i) => (
           <a key={i} href="#" className="smooth group grid md:grid-cols-12 gap-6 items-baseline py-7 relative" style={{ borderTop: '1px solid var(--border)' }} data-hover>

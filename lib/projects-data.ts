@@ -18,6 +18,35 @@ export interface Project {
 
 export const PROJECTS: Project[] = [
   {
+    slug: 'galaxy-morphology-xai',
+    title: 'Galaxy Morphology XAI',
+    subtitle: 'Systematic evaluation of post-hoc explainability across four CNN architectures',
+    category: 'Research · AI/ML',
+    year: '2025',
+    featured: true,
+    widget: 'galaxyXai',
+    desc: 'Deep learning classifiers are now standard tools for automated galaxy morphology analysis at the scale of next-generation astronomical surveys like Rubin LSST. However, black-box neural networks present a critical trust problem for scientific use — astronomers cannot verify whether predictions rely on genuine morphological features or spurious correlations. This project conducts a systematic evaluation of four post-hoc explainability methods (Grad-CAM, LIME, Integrated Gradients, GradientSHAP) across four CNN architectures on two galaxy morphology datasets, using quantitative faithfulness metrics to show that no single explanation method dominates universally.',
+    role: 'Sole researcher',
+    timeline: 'Jan 2025 — May 2025',
+    tech: ['PyTorch', 'Captum', 'LIME', 'Grad-CAM', 'Python', 'NumPy', 'Matplotlib', 'scikit-learn'],
+    features: [
+      'Systematic evaluation of Grad-CAM, LIME, Integrated Gradients, and GradientSHAP across ResNet-18, VGG-16, EfficientNet-B0, and Custom CNN',
+      'Quantitative faithfulness metrics: Deletion AUC, Insertion AUC, Consistency, and Sparsity',
+      'Cross-dataset stress test on Galaxy Zoo Evo to validate explainability generalization',
+      'Statistical significance via Wilcoxon signed-rank and McNemar tests',
+      'Per-class analysis revealing Featured galaxies receive 33% lower Deletion AUC than Smooth galaxies',
+    ],
+    metrics: [
+      ['best accuracy', '96.1% (ResNet-18)'],
+      ['datasets', 'Galaxy10 DECaLS + Galaxy Zoo Evo'],
+      ['images', '9,060 + 1,698'],
+      ['best Deletion AUC', '0.32 (Grad-CAM)'],
+      ['best Insertion AUC', '0.89 (GradientSHAP)'],
+      ['best Consistency', '≥ 0.96 (Grad-CAM)'],
+    ],
+    github: 'https://github.com/Archit1706/galaxy-morphology-xai',
+  },
+  {
     slug: 'osm-temporary-road-closures',
     title: 'OSM Temporary Road Closures',
     subtitle: 'Database & API for the OpenStreetMap Foundation · GSoC 2025',

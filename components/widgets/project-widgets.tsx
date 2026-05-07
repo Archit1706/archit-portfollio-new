@@ -576,6 +576,314 @@ export function AuctionWidget() {
   );
 }
 
+/* =========================================================
+   GALAXY MORPHOLOGY XAI
+   ========================================================= */
+export function GalaxyXAIWidget() {
+  const [method, setMethod] = useState<'gradcam' | 'lime' | 'ig' | 'shap'>('gradcam');
+  const [arch, setArch] = useState<'resnet18' | 'vgg16' | 'effnet' | 'custom'>('resnet18');
+  const [galaxyType, setGalaxyType] = useState<'featured' | 'smooth'>('featured');
+  const [phase, setPhase] = useState<'idle' | 'running' | 'done'>('idle');
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const run = () => {
+    setPhase('running');
+    setProgress(0);
+    let p = 0;
+    const tick = () => {
+      p += Math.random() * 7 + 3;
+      if (p >= 100) { setProgress(100); setPhase('done'); return; }
+      setProgress(Math.min(p, 100));
+      timerRef.current = setTimeout(tick, 70);
+    };
+    timerRef.current = setTimeout(tick, 80);
+  };
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  const { arm1, arm2 } = useMemo(() => {
+    const cx = 190, cy = 125, a = 6, b = 0.22;
+    const a1: { x: number; y: number; s: number }[] = [];
+    const a2: { x: number; y: number; s: number }[] = [];
+    for (let theta = 0.4; theta < 4.2 * Math.PI; theta += 0.18) {
+      const r = a * Math.exp(b * theta);
+      const s = Math.max(0.7, 2.8 - theta * 0.12);
+      a1.push({ x: cx + r * Math.cos(theta), y: cy + r * Math.sin(theta), s });
+      a2.push({ x: cx + r * Math.cos(theta + Math.PI), y: cy + r * Math.sin(theta + Math.PI), s });
+    }
+    return { arm1: a1, arm2: a2 };
+  }, []);
+
+  const stars = useMemo(() => [
+    [12,8],[45,15],[78,23],[15,42],[190,8],[250,18],[320,12],[360,35],[28,70],[380,85],
+    [5,110],[392,140],[18,165],[375,180],[35,210],[355,225],[20,245],[370,258],[65,248],
+    [320,240],[280,10],[100,5],[155,242],[230,252],[295,235],[68,90],[340,95],[72,185],
+    [330,175],[48,130],[348,130],[120,230],[280,228],[95,62],[305,62],[52,175],[348,175],
+  ].map(([x, y], i) => ({ x, y, r: [0.8,1.2,0.6,1.0,0.7,1.4][i%6], o: [0.4,0.7,0.5,0.8,0.35,0.6][i%6] })), []);
+
+  const HEATMAPS = {
+    gradcam: [
+      { cx:190, cy:125, rx:52, ry:40, color:'rgba(239,68,68,0.72)' },
+      { cx:138, cy:75,  rx:28, ry:22, color:'rgba(251,146,60,0.60)' },
+      { cx:248, cy:178, rx:26, ry:20, color:'rgba(251,146,60,0.55)' },
+      { cx:190, cy:125, rx:95, ry:72, color:'rgba(99,102,241,0.18)' },
+    ],
+    lime: [
+      { cx:162, cy:100, rx:42, ry:32, color:'rgba(239,68,68,0.65)' },
+      { cx:218, cy:150, rx:42, ry:32, color:'rgba(239,68,68,0.60)' },
+      { cx:138, cy:150, rx:36, ry:28, color:'rgba(251,146,60,0.50)' },
+      { cx:244, cy:100, rx:36, ry:28, color:'rgba(251,146,60,0.45)' },
+      { cx:190, cy:125, rx:24, ry:18, color:'rgba(250,204,21,0.62)' },
+    ],
+    ig: [
+      { cx:190, cy:125, rx:28, ry:21, color:'rgba(239,68,68,0.82)' },
+      { cx:168, cy:103, rx:15, ry:11, color:'rgba(239,68,68,0.72)' },
+      { cx:213, cy:148, rx:15, ry:11, color:'rgba(239,68,68,0.68)' },
+      { cx:148, cy:80,  rx:11, ry:9,  color:'rgba(251,146,60,0.58)' },
+      { cx:234, cy:172, rx:11, ry:9,  color:'rgba(251,146,60,0.52)' },
+      { cx:128, cy:58,  rx:9,  ry:7,  color:'rgba(251,146,60,0.42)' },
+    ],
+    shap: [
+      { cx:190, cy:125, rx:72, ry:56, color:'rgba(239,68,68,0.45)' },
+      { cx:162, cy:97,  rx:46, ry:36, color:'rgba(239,68,68,0.56)' },
+      { cx:220, cy:156, rx:46, ry:36, color:'rgba(251,146,60,0.50)' },
+      { cx:140, cy:148, rx:30, ry:24, color:'rgba(251,146,60,0.40)' },
+      { cx:240, cy:106, rx:30, ry:24, color:'rgba(250,204,21,0.36)' },
+      { cx:190, cy:125, rx:125, ry:95, color:'rgba(99,102,241,0.15)' },
+    ],
+  } as const;
+
+  const SMOOTH_HEATMAPS = {
+    gradcam: [{ cx:190, cy:125, rx:58, ry:44, color:'rgba(239,68,68,0.78)' }, { cx:190, cy:125, rx:95, ry:72, color:'rgba(251,146,60,0.28)' }],
+    lime:    [{ cx:190, cy:125, rx:62, ry:48, color:'rgba(239,68,68,0.70)' }, { cx:190, cy:125, rx:105, ry:80, color:'rgba(99,102,241,0.22)' }],
+    ig:      [{ cx:190, cy:125, rx:40, ry:30, color:'rgba(239,68,68,0.84)' }, { cx:190, cy:125, rx:68, ry:52, color:'rgba(251,146,60,0.48)' }],
+    shap:    [{ cx:190, cy:125, rx:82, ry:62, color:'rgba(239,68,68,0.52)' }, { cx:190, cy:125, rx:135, ry:104, color:'rgba(99,102,241,0.18)' }],
+  } as const;
+
+  const METRICS: Record<string, Record<string, [number,number,number,number]>> = {
+    gradcam: { resnet18:[0.32,0.71,0.97,0.61], vgg16:[0.38,0.68,0.94,0.58], effnet:[0.35,0.72,0.95,0.63], custom:[0.44,0.64,0.90,0.54] },
+    lime:    { resnet18:[0.47,0.76,0.88,0.73], vgg16:[0.51,0.73,0.85,0.70], effnet:[0.45,0.78,0.86,0.75], custom:[0.56,0.70,0.81,0.68] },
+    ig:      { resnet18:[0.41,0.82,0.92,0.68], vgg16:[0.45,0.79,0.89,0.65], effnet:[0.39,0.84,0.91,0.70], custom:[0.49,0.76,0.86,0.63] },
+    shap:    { resnet18:[0.36,0.89,0.93,0.76], vgg16:[0.40,0.86,0.90,0.73], effnet:[0.34,0.91,0.92,0.78], custom:[0.45,0.83,0.87,0.71] },
+  };
+
+  const ACCURACY: Record<string, string> = { resnet18:'96.1%', vgg16:'93.4%', effnet:'94.8%', custom:'88.6%' };
+  const METHOD_INFO: Record<string, string> = {
+    gradcam: 'Grad-CAM backpropagates through the last conv layer to localize class-discriminative regions.',
+    lime:    'LIME perturbs superpixel segments and fits a local linear surrogate model per prediction.',
+    ig:      'Integrated Gradients accumulates gradients along the path from a baseline to the input.',
+    shap:    'GradientSHAP combines SHAP values with expected gradient attribution for precise localization.',
+  };
+
+  const currentHeatmap = (galaxyType === 'smooth' ? SMOOTH_HEATMAPS : HEATMAPS)[method];
+  const [del, ins, con, spa] = METRICS[method][arch];
+  const statusColor = phase === 'idle' ? 'var(--text-muted)' : phase === 'running' ? 'var(--accent)' : '#4ade80';
+
+  return (
+    <div className="glass rounded-2xl overflow-hidden relative" style={{ boxShadow: 'var(--shadow-glass)' }}>
+      {/* Chrome */}
+      <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5">
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ff5f56' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ffbd2e' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#27c93f' }} />
+          </div>
+          <span className="font-mono text-[11px]" style={{ color: 'var(--text-muted)' }}>galaxy-xai · morphology-classifier · v1.0</span>
+        </div>
+        <div className="flex items-center gap-2 font-mono text-[11px]">
+          <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: statusColor, boxShadow: `0 0 8px ${statusColor}` }} />
+          <span style={{ color: statusColor, letterSpacing: '0.06em' }}>
+            {phase === 'idle' ? 'READY' : phase === 'running' ? 'CLASSIFYING' : 'EXPLAINED'}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-5 gap-0">
+        {/* Galaxy visualization */}
+        <div className="md:col-span-3 relative border-b md:border-b-0 md:border-r" style={{ borderColor: 'var(--border)', background: '#040410' }}>
+          <svg viewBox="0 0 380 250" className="w-full" style={{ maxHeight: 340 }}>
+            <defs>
+              <filter id="gxai-glow">
+                <feGaussianBlur stdDeviation="5" result="b" />
+                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+              <filter id="gxai-hmap"><feGaussianBlur stdDeviation="13" /></filter>
+              <radialGradient id="gxai-core" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="rgba(255,235,185,1)" />
+                <stop offset="40%" stopColor="rgba(200,165,105,0.55)" />
+                <stop offset="100%" stopColor="rgba(80,50,20,0)" />
+              </radialGradient>
+              <radialGradient id="gxai-smooth" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="rgba(235,225,205,1)" />
+                <stop offset="35%" stopColor="rgba(185,165,135,0.5)" />
+                <stop offset="100%" stopColor="rgba(80,70,50,0)" />
+              </radialGradient>
+            </defs>
+
+            <rect width="380" height="250" fill="#040410" />
+            {stars.map((s, i) => <circle key={i} cx={s.x} cy={s.y} r={s.r} fill={`rgba(255,255,255,${s.o})`} />)}
+
+            {/* Heatmap */}
+            {phase !== 'idle' && (
+              <g filter="url(#gxai-hmap)">
+                {currentHeatmap.map((h, i) => (
+                  <ellipse key={i} cx={h.cx} cy={h.cy} rx={h.rx} ry={h.ry}
+                    fill={h.color}
+                    opacity={phase === 'running' ? (progress / 100) : 1}
+                    style={{ transition: 'opacity 0.35s ease' }}
+                  />
+                ))}
+              </g>
+            )}
+
+            {/* Spiral arms (featured) */}
+            {galaxyType === 'featured' && arm1.map((p, i) => (
+              <circle key={`a1-${i}`} cx={p.x} cy={p.y} r={p.s} fill={`rgba(205,175,120,${0.28 + (1 - i / arm1.length) * 0.42})`} />
+            ))}
+            {galaxyType === 'featured' && arm2.map((p, i) => (
+              <circle key={`a2-${i}`} cx={p.x} cy={p.y} r={p.s} fill={`rgba(185,155,100,${0.28 + (1 - i / arm2.length) * 0.42})`} />
+            ))}
+            {galaxyType === 'smooth' && <ellipse cx="190" cy="125" rx="82" ry="56" fill="rgba(200,188,160,0.07)" />}
+
+            {/* Core */}
+            <ellipse cx="190" cy="125"
+              rx={galaxyType === 'smooth' ? 56 : 22}
+              ry={galaxyType === 'smooth' ? 38 : 14}
+              fill={`url(#gxai-${galaxyType === 'smooth' ? 'smooth' : 'core'})`}
+              filter="url(#gxai-glow)"
+              style={{ transition: 'all 0.8s cubic-bezier(0.23,1,0.32,1)' }}
+            />
+            <ellipse cx="190" cy="125"
+              rx={galaxyType === 'smooth' ? 20 : 7}
+              ry={galaxyType === 'smooth' ? 14 : 5}
+              fill="rgba(255,245,215,0.95)"
+            />
+
+            {/* Scan line */}
+            {phase === 'running' && (
+              <line x1="0" y1={250 * (1 - progress / 100)} x2="380" y2={250 * (1 - progress / 100)}
+                stroke="var(--accent)" strokeWidth="1.5" opacity="0.6"
+                style={{ transition: 'y1 0.15s ease, y2 0.15s ease' }}
+              />
+            )}
+
+            {/* Done badge */}
+            {phase === 'done' && (
+              <g>
+                <rect x="8" y="218" width="200" height="24" rx="3" fill="rgba(4,4,16,0.85)" />
+                <text x="16" y="229" fontFamily="JetBrains Mono,monospace" fontSize="8.5" fill="#4ade80">
+                  ✓ {galaxyType === 'featured' ? 'FEATURED · SPIRAL GALAXY' : 'SMOOTH · ELLIPTICAL GALAXY'}
+                </text>
+                <text x="16" y="238" fontFamily="JetBrains Mono,monospace" fontSize="7.5" fill="rgba(180,180,180,0.65)">
+                  {ACCURACY[arch]} · {arch === 'resnet18' ? 'ResNet-18' : arch === 'vgg16' ? 'VGG-16' : arch === 'effnet' ? 'EfficientNet-B0' : 'Custom CNN'}
+                </text>
+              </g>
+            )}
+          </svg>
+
+          {/* Heatmap scale */}
+          {phase === 'done' && (
+            <div className="absolute bottom-3 right-3 flex items-center gap-2">
+              <span className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.35)' }}>low</span>
+              <div style={{ width: 56, height: 5, borderRadius: 3, background: 'linear-gradient(to right,rgba(99,102,241,0.7),rgba(251,146,60,0.85),rgba(239,68,68,0.95))' }} />
+              <span className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.35)' }}>high</span>
+            </div>
+          )}
+        </div>
+
+        {/* Controls + metrics */}
+        <div className="md:col-span-2 p-5 flex flex-col gap-4">
+          {/* Galaxy type */}
+          <div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-1.5" style={{ color: 'var(--text-muted)' }}>Galaxy Type</div>
+            <div className="flex gap-1.5">
+              {(['featured', 'smooth'] as const).map((t) => (
+                <button key={t} onClick={() => { setGalaxyType(t); setPhase('idle'); setProgress(0); }}
+                  className="flex-1 font-mono text-[10px] py-1.5 rounded-md uppercase tracking-[0.10em] smooth"
+                  style={{ background: galaxyType === t ? 'var(--accent)' : 'var(--bg-elev)', color: galaxyType === t ? 'var(--bg)' : 'var(--text-muted)', border: `1px solid ${galaxyType === t ? 'var(--accent)' : 'var(--border-strong)'}` }}
+                  data-hover>
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Architecture */}
+          <div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-1.5" style={{ color: 'var(--text-muted)' }}>Architecture</div>
+            <div className="grid grid-cols-2 gap-1">
+              {([['resnet18','ResNet-18'],['vgg16','VGG-16'],['effnet','EffNet-B0'],['custom','Custom CNN']] as [string,string][]).map(([k,label]) => (
+                <button key={k} onClick={() => setArch(k as typeof arch)}
+                  className="font-mono text-[10px] py-1.5 rounded-md smooth"
+                  style={{ background: arch === k ? 'var(--accent-soft)' : 'var(--bg-elev)', color: arch === k ? 'var(--accent)' : 'var(--text-muted)', border: `1px solid ${arch === k ? 'var(--accent)' : 'var(--border)'}` }}
+                  data-hover>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* XAI Method */}
+          <div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-1.5" style={{ color: 'var(--text-muted)' }}>XAI Method</div>
+            <div className="grid grid-cols-2 gap-1">
+              {([['gradcam','Grad-CAM'],['lime','LIME'],['ig','Int. Grads'],['shap','Grad-SHAP']] as [string,string][]).map(([k,label]) => (
+                <button key={k} onClick={() => setMethod(k as typeof method)}
+                  className="font-mono text-[10px] py-1.5 rounded-md smooth"
+                  style={{ background: method === k ? 'var(--accent-soft)' : 'var(--bg-elev)', color: method === k ? 'var(--accent)' : 'var(--text-muted)', border: `1px solid ${method === k ? 'var(--accent)' : 'var(--border)'}` }}
+                  data-hover>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Run button */}
+          <button
+            onClick={phase !== 'running' ? run : undefined}
+            disabled={phase === 'running'}
+            className="w-full py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.14em] smooth flex items-center justify-center gap-2"
+            style={{ background: phase === 'running' ? 'var(--bg-elev)' : 'var(--accent)', color: phase === 'running' ? 'var(--text-muted)' : 'var(--bg)', border: `1px solid ${phase === 'running' ? 'var(--border-strong)' : 'var(--accent)'}` }}
+            data-hover>
+            {phase === 'running' ? `analyzing… ${Math.round(progress)}%` : phase === 'done' ? '↺ re-run explainer' : '▶ run explainer'}
+          </button>
+
+          {/* Metrics / idle hint */}
+          {phase === 'done' ? (
+            <div className="space-y-1">
+              <div className="font-mono text-[9px] uppercase tracking-[0.18em] pb-1 border-b" style={{ color: 'var(--text-muted)', borderColor: 'var(--border)' }}>Faithfulness Metrics</div>
+              {([['Deletion AUC ↓', del.toFixed(2), del <= 0.36], ['Insertion AUC ↑', ins.toFixed(2), ins >= 0.86], ['Consistency ↑', con.toFixed(2), con >= 0.95], ['Sparsity ↑', spa.toFixed(2), spa >= 0.73]] as [string,string,boolean][]).map(([k,v,best]) => (
+                <div key={k} className="flex items-center justify-between text-[11px]">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.10em]" style={{ color: 'var(--text-muted)' }}>{k}</span>
+                  <span className="font-mono" style={{ color: best ? '#4ade80' : 'var(--text-primary)' }}>{v}</span>
+                </div>
+              ))}
+              <p className="font-mono text-[9px] pt-1 leading-relaxed" style={{ color: 'var(--text-faint)' }}>
+                {METHOD_INFO[method]}
+              </p>
+            </div>
+          ) : (
+            <p className="font-mono text-[10px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+              Select a galaxy type, architecture, and XAI method. Run the explainer to overlay attention heatmaps and see faithfulness scores.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="h-0.5 w-full" style={{ background: 'var(--border)' }}>
+        <div className="h-full" style={{
+          width: `${phase === 'done' ? 100 : progress}%`,
+          background: phase === 'done' ? '#4ade80' : 'var(--accent)',
+          transition: 'width 0.2s ease, background 0.4s ease',
+        }} />
+      </div>
+    </div>
+  );
+}
+
 export function TerminalFallbackWidget({ project }: { project: Project }) {
   const lines = [
     `$ git clone ${project.github || 'https://github.com/Archit1706/' + project.slug}`,

@@ -7,6 +7,7 @@ import { CustomCursor } from '@/components/cursor';
 import { PROJECTS, PROJECT_BY_SLUG, Project } from '@/lib/projects-data';
 import { IconSun, IconMoon } from '@/components/icons';
 import {
+  GalaxyXAIWidget,
   OSMMapWidget,
   ChatAgentWidget,
   CycleGraphWidget,
@@ -39,6 +40,7 @@ import {
 type WidgetComponent = React.ComponentType<{ project: Project }>;
 
 const WIDGET_MAP: Record<string, WidgetComponent> = {
+  galaxyXai: GalaxyXAIWidget as WidgetComponent,
   osmMap: OSMMapWidget as WidgetComponent,
   chatAgent: ChatAgentWidget as WidgetComponent,
   cycleGraph: CycleGraphWidget as WidgetComponent,
