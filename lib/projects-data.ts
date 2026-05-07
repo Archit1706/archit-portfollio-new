@@ -18,6 +18,30 @@ export interface Project {
 
 export const PROJECTS: Project[] = [
   {
+    slug: 'fairlint-dl',
+    title: 'FairLint DL',
+    subtitle: 'Deep-learning fairness debugger shipped as a VS Code extension',
+    category: 'AI/ML · Open Source',
+    year: '2026',
+    widget: 'fairlintDl',
+    desc: 'A deep-learning-based fairness debugger that ships as a VS Code extension. It wraps a custom PyTorch DNN around a two-phase gradient-ascent counterfactual search — scanning model outputs for demographic disparities in real time and surfacing causal explanations, cutting auditing time by 40% versus manual inspection.',
+    role: 'Sole engineer',
+    timeline: '2025 — 2026',
+    tech: ['PyTorch', 'VS Code API', 'TypeScript', 'Causal DAGs', 'Gradient Ascent', 'Counterfactuals', 'Node.js'],
+    features: [
+      'Real-time fairness scanning integrated into the VS Code sidebar',
+      'Two-phase gradient-ascent counterfactual search to isolate causal bias sources',
+      'Custom PyTorch DNN for demographic disparity detection across 12 fairness metrics',
+      'Interactive highlight layer — flagged rows glow directly in the editor',
+      '40% reduction in auditing time vs. standalone script-based workflows',
+    ],
+    metrics: [
+      ['auditing time', '−40%'],
+      ['fairness metrics', '12 supported'],
+      ['counterfactual samples', '2,048 / run'],
+    ],
+  },
+  {
     slug: 'galaxy-morphology-xai',
     title: 'Galaxy Morphology XAI',
     subtitle: 'Systematic evaluation of post-hoc explainability across four CNN architectures',

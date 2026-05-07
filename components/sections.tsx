@@ -11,6 +11,7 @@ import {
 import { FairLintWidget } from './fairlint';
 import { GalaxyXAIWidget } from './widgets/project-widgets';
 import { useTheme } from './theme-provider';
+import { PROJECTS } from '@/lib/projects-data';
 
 /* =========================================================
    STREAMING HERO TEXT
@@ -227,9 +228,9 @@ function StatRow({ k, v, accent }: { k: string; v: string; accent?: boolean }) {
   );
 }
 
-function ProjectCard({ kicker, title, body, tags, stats, icon }: { kicker: string; title: string; body: string; tags: string[]; stats: [string, string][]; icon: ReactNode }) {
-  return (
-    <div className="glass rounded-2xl p-7 smooth relative overflow-hidden" data-hover>
+function ProjectCard({ kicker, title, body, tags, stats, icon, href }: { kicker: string; title: string; body: string; tags: string[]; stats: [string, string][]; icon: ReactNode; href?: string }) {
+  const inner = (
+    <div className="glass rounded-2xl p-7 smooth relative overflow-hidden h-full" data-hover>
       <div className="flex items-start justify-between mb-5">
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] px-2 py-1 rounded" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>{kicker}</span>
         <span style={{ color: 'var(--text-muted)' }}>{icon}</span>
@@ -245,14 +246,21 @@ function ProjectCard({ kicker, title, body, tags, stats, icon }: { kicker: strin
           </div>
         ))}
       </div>
+      {href && (
+        <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: 'var(--accent)' }}>
+          view project →
+        </div>
+      )}
     </div>
   );
+  if (href) return <Link href={href}>{inner}</Link>;
+  return inner;
 }
 
 export function Work() {
   return (
     <section id="work" className="relative px-6 md:px-10 max-w-[1400px] mx-auto py-24">
-      <SectionHeader idx="02" kicker="featured work" title={<>Tools that <em className="font-serif" style={{ fontStyle: 'italic' }}>prove</em> the thesis.</>} subtitle="Four projects at the intersection of scalable systems and responsible AI — a VS Code fairness debugger, a galaxy morphology explainability study, a real-estate platform serving 1,000+ ZIPs, and a year of published research." />
+      <SectionHeader idx="02" kicker="featured work" title={<>Tools that <em className="font-serif" style={{ fontStyle: 'italic' }}>prove</em> the thesis.</>} subtitle="Four projects at the intersection of scalable systems and responsible AI — a VS Code fairness debugger, a galaxy morphology explainability study, an agentic real-estate platform, and a year of published research." />
 
       <div className="grid md:grid-cols-12 gap-8 mb-16">
         <div className="md:col-span-5">
@@ -320,12 +328,13 @@ export function Work() {
 
       <div className="grid md:grid-cols-2 gap-6">
         <ProjectCard
-          kicker="full-stack"
-          title="RealEstateAI"
-          body="Full-stack platform covering 1,000+ ZIP codes. Next.js + FastAPI, integrated with Google Maps and Zillow APIs, with reverse geocoding and persistent stateful UI."
-          tags={['Next.js', 'Tailwind', 'FastAPI', 'Google Maps', 'Zillow API']}
-          stats={[['zip codes', '1,000+'], ['apis integrated', '4'], ['latency', '<120ms']]}
+          kicker="full-stack · ai agents"
+          title="Keya AI"
+          body="Agentic real-estate assistant covering 1,000+ ZIP codes. LangChain + Azure OpenAI, integrated with Zillow, Google Maps, and GreatSchools APIs — with personalized property recommendations and dual chat interfaces."
+          tags={['LangChain', 'Azure OpenAI', 'Next.js', 'FastAPI', 'Zillow API']}
+          stats={[['agent tools', '8'], ['languages', '4'], ['zip codes', '1,000+']]}
           icon={<IconGlobe size={18} />}
+          href="/project/keya-ai"
         />
         <ProjectCard
           kicker="research · multi"
@@ -339,7 +348,7 @@ export function Work() {
 
       <div className="mt-12 flex justify-center">
         <Link href="/projects" className="smooth glass px-6 py-4 rounded-md font-mono text-[12px] flex items-center gap-3 uppercase tracking-[0.12em]" data-hover>
-          view all 24 projects <IconArrowUpRight size={14} stroke={2} />
+          view all {PROJECTS.length} projects <IconArrowUpRight size={14} stroke={2} />
         </Link>
       </div>
     </section>

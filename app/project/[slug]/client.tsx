@@ -38,7 +38,18 @@ function cw(name: string): WC {
   ) as WC;
 }
 
+function fl(name: string): WC {
+  return dynamic<{ project: Project }>(
+    () =>
+      import('@/components/fairlint').then((m) => ({
+        default: (m as unknown as WidgetModule)[name],
+      })),
+    { loading: WidgetLoading }
+  ) as WC;
+}
+
 const WIDGET_MAP: Record<string, WC> = {
+  fairlintDl: fl('FairLintProjectWidget'),
   galaxyXai:   pw('GalaxyXAIWidget'),
   greenPipe:   pw('GreenPipeWidget'),
   fairLend:    pw('FairLendWidget'),

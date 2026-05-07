@@ -253,3 +253,7 @@ export function FairLintWidget() {
     </div>
   );
 }
+
+export function FairLintProjectWidget(_: { project: unknown }) {
+  return <FairLintWidget />;
+}
