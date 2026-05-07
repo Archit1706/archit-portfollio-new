@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, useRef, ReactNode } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   IconArrowRight, IconArrowUpRight, IconArrowDown, IconSun, IconMoon,
   IconMapPin, IconSparkles, IconGlobe, IconBook, IconCode, IconLayers,
@@ -24,6 +23,57 @@ function StreamText({ text, speed = 48, onDone }: { text: string; speed?: number
     return () => clearTimeout(t);
   }, [i, text, speed, onDone]);
   return <>{text.slice(0, i)}<span className="stream-caret" /></>;
+}
+
+/* =========================================================
+   HERO TERMINAL
+   ========================================================= */
+const TERMINAL_LINES = [
+  { cmd: true,  text: 'whoami' },
+  { cmd: false, text: 'archit rathod · ms cs · uic · chicago' },
+  { cmd: true,  text: 'cat projects.txt | wc -l' },
+  { cmd: false, text: '27 shipped' },
+  { cmd: true,  text: 'git log --oneline -3' },
+  { cmd: false, text: '* galaxy morphology xai' },
+  { cmd: false, text: '* greenpipe ci/cd agent' },
+  { cmd: false, text: '* fairlend miners (data mining)' },
+  { cmd: true,  text: 'echo $STATUS' },
+  { cmd: false, text: 'available · spring 2026 ●' },
+];
+
+function HeroTerminal({ active }: { active: boolean }) {
+  const [shown, setShown] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!active || shown >= TERMINAL_LINES.length) return;
+    timerRef.current = setTimeout(() => setShown((s) => s + 1), shown === 0 ? 300 : 140);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [active, shown]);
+
+  return (
+    <div className="glass rounded-xl overflow-hidden font-mono text-[11px]" style={{ border: '1px solid var(--border-strong)' }}>
+      <div className="flex items-center gap-1.5 px-4 py-2.5 border-b" style={{ borderColor: 'var(--border)', background: 'var(--bg-elev)' }}>
+        <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#ff5f56' }} />
+        <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#ffbd2e' }} />
+        <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#27c93f' }} />
+        <span className="ml-2 text-[10px] uppercase tracking-[0.16em]" style={{ color: 'var(--text-faint)' }}>ar@archit.dev — zsh</span>
+      </div>
+      <div className="p-4 space-y-0.5 leading-6" style={{ background: 'var(--bg)', minHeight: 192 }}>
+        {TERMINAL_LINES.slice(0, shown).map((l, i) => (
+          <div key={i} style={{ color: l.cmd ? 'var(--accent)' : 'var(--text-muted)' }}>
+            {l.cmd ? <><span style={{ color: 'var(--text-faint)' }}>~ </span>$ {l.text}</> : <span style={{ paddingLeft: 14 }}>{l.text}</span>}
+          </div>
+        ))}
+        {shown < TERMINAL_LINES.length && (
+          <div style={{ color: 'var(--accent)' }}>
+            <span style={{ color: 'var(--text-faint)' }}>~ </span>$
+            <span className="inline-block w-1.5 h-3.5 ml-1 align-middle" style={{ background: 'var(--accent)', animation: 'blink 1s steps(2) infinite' }} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 /* =========================================================
@@ -113,20 +163,12 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="md:col-span-4 space-y-4" style={{ opacity: streamDone ? 1 : 0, transform: streamDone ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.9s var(--ease) 0.4s' }}>
-          <div className="glass rounded-2xl overflow-hidden relative noise">
-            <div className="relative">
-              <Image src="/assets/archit.jpg" alt="Archit Rathod" width={400} height={500} className="w-full aspect-[4/5] object-cover" style={{ filter: 'grayscale(0.1) contrast(1.05)' }} />
-              <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(13,13,20,0.85), transparent 40%)' }} />
-              <div className="absolute bottom-4 left-4 right-4 font-mono text-[10px] uppercase tracking-[0.18em] flex justify-between" style={{ color: 'rgba(232,232,240,0.85)' }}>
-                <span>AR · 001</span><span>35mm · natural</span>
-              </div>
-            </div>
-          </div>
+        <div className="md:col-span-4 space-y-3" style={{ opacity: streamDone ? 1 : 0, transform: streamDone ? 'translateY(0)' : 'translateY(16px)', transition: 'all 0.9s var(--ease) 0.4s' }}>
+          <HeroTerminal active={streamDone} />
           <div className="glass rounded-xl p-4 space-y-2 font-mono text-[11px]">
             <div className="flex justify-between"><span style={{ color: 'var(--text-muted)' }}>focus</span><span>ML fairness · distributed systems</span></div>
             <div className="flex justify-between"><span style={{ color: 'var(--text-muted)' }}>stack</span><span>py · ts · pytorch · gcp</span></div>
-            <div className="flex justify-between"><span style={{ color: 'var(--text-muted)' }}>shipping</span><span style={{ color: 'var(--accent)' }}>● real-time</span></div>
+            <div className="flex justify-between"><span style={{ color: 'var(--text-muted)' }}>gsoc</span><span>openstreetmap · 2025</span></div>
           </div>
         </div>
       </div>
@@ -430,13 +472,24 @@ export function Skills() {
           </div>
         ))}
       </div>
-      <div className="mt-10 glass rounded-xl p-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: 'var(--text-muted)' }}>education · m.s. computer science</div>
-          <div className="font-serif text-xl mt-1">University of Illinois Chicago · Aug 2024 — May 2026</div>
+      <div className="mt-10 space-y-3">
+        <div className="glass rounded-xl p-6 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: 'var(--text-muted)' }}>m.s. computer science</div>
+            <div className="font-serif text-xl mt-1">University of Illinois Chicago · Aug 2024 — May 2026</div>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {['NLP', 'Data Science', 'Algorithmic Fairness', 'Responsible AI'].map((c) => <span key={c} className="tag accent">{c}</span>)}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {['NLP', 'Data Science', 'Algorithmic Fairness', 'Responsible AI'].map((c) => <span key={c} className="tag accent">{c}</span>)}
+        <div className="glass rounded-xl p-6 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: 'var(--text-muted)' }}>b.e. information technology · tsec · university of mumbai</div>
+            <div className="font-serif text-xl mt-1">Thadomal Shahani Engineering College · Feb 2021 — May 2024</div>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {['Machine Learning', 'Computer Networks', 'Data Mining', 'Image Processing', 'Business Intelligence'].map((c) => <span key={c} className="tag">{c}</span>)}
+          </div>
         </div>
       </div>
     </section>

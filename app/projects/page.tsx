@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useTheme } from '@/components/theme-provider';
-import { CustomCursor } from '@/components/cursor';
 import { PROJECTS, Project } from '@/lib/projects-data';
 import { IconSun, IconMoon } from '@/components/icons';
 
@@ -34,9 +33,8 @@ function ProjectRow({ p, idx }: { p: Project; idx: number }) {
           {String(idx + 1).padStart(2, '0')}
         </div>
         <div className="md:col-span-5 flex items-baseline gap-3">
-          {p.featured && (
-            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: 'var(--accent)' }} />
-          )}
+          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2"
+            style={{ background: p.featured ? 'var(--accent)' : 'var(--border-strong)' }} />
           <h3
             className="font-serif text-[26px] tracking-tight smooth"
             style={{ color: hover ? 'var(--accent)' : 'var(--text-primary)' }}
@@ -67,7 +65,7 @@ function ProjectRow({ p, idx }: { p: Project; idx: number }) {
 }
 
 export default function ProjectsPage() {
-  const { theme, setTheme, customCursor, showGrid } = useTheme();
+  const { theme, setTheme, showGrid } = useTheme();
   const [filter, setFilter] = useState<string>('all');
   const [query, setQuery] = useState('');
 
@@ -95,7 +93,6 @@ export default function ProjectsPage() {
 
   return (
     <>
-      {customCursor && <CustomCursor />}
       {showGrid && (
         <div className="fixed inset-0 grid-paper pointer-events-none" style={{ opacity: 0.3, zIndex: 0 }} aria-hidden="true" />
       )}

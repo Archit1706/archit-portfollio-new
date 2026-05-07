@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useTheme } from '@/components/theme-provider';
-import { CustomCursor } from '@/components/cursor';
 import { TweaksPanel, TweakSection, TweakSlider, TweakToggle } from '@/components/tweaks-panel';
 import { Nav, Hero, Marquee, Work, Experience, Skills, Research, Contact } from '@/components/sections';
 
@@ -29,7 +28,6 @@ export default function Home() {
 
   return (
     <>
-      {customCursor && <CustomCursor />}
       {ambientGlow && <div className="ambient-glow" aria-hidden="true" />}
 
       <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">

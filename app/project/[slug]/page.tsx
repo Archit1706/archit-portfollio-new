@@ -3,7 +3,6 @@
 import { use } from 'react';
 import Link from 'next/link';
 import { useTheme } from '@/components/theme-provider';
-import { CustomCursor } from '@/components/cursor';
 import { PROJECTS, PROJECT_BY_SLUG, Project } from '@/lib/projects-data';
 import { IconSun, IconMoon } from '@/components/icons';
 import {
@@ -84,7 +83,7 @@ function SidebarBlock({ label, value }: { label: string; value?: string }) {
 
 export default function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
-  const { theme, setTheme, customCursor, showGrid } = useTheme();
+  const { theme, setTheme, showGrid } = useTheme();
 
   const p = PROJECT_BY_SLUG[slug];
   const idx = PROJECTS.findIndex((x) => x.slug === slug);
@@ -106,7 +105,6 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
-      {customCursor && <CustomCursor />}
       {showGrid && (
         <div className="fixed inset-0 grid-paper pointer-events-none" style={{ opacity: 0.25, zIndex: 0 }} aria-hidden="true" />
       )}
