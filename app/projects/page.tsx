@@ -124,6 +124,7 @@ export default function ProjectsPage() {
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="px-3 py-1.5 rounded border smooth"
               style={{ borderColor: 'var(--border-strong)', color: 'var(--text-primary)' }}
+              aria-label="Toggle light/dark theme"
               data-hover
             >
               {theme === 'dark' ? <IconSun size={14} /> : <IconMoon size={14} />}
@@ -174,6 +175,7 @@ export default function ProjectsPage() {
                 placeholder="filter by title, tech…"
                 className="bg-transparent outline-none font-mono text-[11px] w-48"
                 style={{ color: 'var(--text-primary)' }}
+                aria-label="Filter projects by title or technology"
               />
             </div>
           </div>

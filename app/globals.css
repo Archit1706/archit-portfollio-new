@@ -252,3 +252,27 @@ a, button { cursor: none; }
 ::view-transition-new(root) {
   animation: 450ms var(--ease) both page-enter;
 }
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .marquee { animation: none; }
+  .page-enter { animation: none; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}

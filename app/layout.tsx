@@ -30,6 +30,14 @@ export const metadata: Metadata = {
   title: 'Archit Rathod — Software Engineer & ML Fairness Researcher',
   description:
     'Portfolio of Archit Rathod — bridging scalable data engineering with transparent, responsible AI. MS Computer Science @ UIC.',
+  robots: { index: true, follow: true },
+  openGraph: {
+    title: 'Archit Rathod — Software Engineer & ML Fairness Researcher',
+    description:
+      'Portfolio of Archit Rathod — bridging scalable data engineering with transparent, responsible AI. MS Computer Science @ UIC.',
+    type: 'website',
+    locale: 'en_US',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

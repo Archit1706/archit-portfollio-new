@@ -45,6 +45,8 @@ export function TweaksPanel({ title, defaultOpen = false, children }: TweaksPane
           border: '1px solid var(--border-strong)',
           color: 'var(--text-muted)',
         }}
+        aria-label={open ? 'Close tweaks panel' : 'Open tweaks panel'}
+        aria-expanded={open}
         data-hover
       >
         <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
@@ -101,6 +103,7 @@ export function TweakSlider({ label, min, max, step, value, onChange }: TweakSli
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full"
         style={{ accentColor: 'var(--accent)' }}
+        aria-label={label}
       />
     </div>
   );
@@ -123,6 +126,8 @@ export function TweakToggle({ label, value, onChange }: TweakToggleProps) {
           background: value ? 'var(--accent)' : 'var(--border-strong)',
           border: '1px solid ' + (value ? 'var(--accent)' : 'var(--border-strong)'),
         }}
+        aria-label={`${label}: ${value ? 'on' : 'off'}`}
+        aria-pressed={value}
         data-hover
       >
         <span

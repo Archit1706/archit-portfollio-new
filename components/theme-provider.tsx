@@ -40,7 +40,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [ambientGlow, setAmbientGlow] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem('ar-theme') as 'dark' | 'light' | null;
+    const raw = localStorage.getItem('ar-theme');
+    const saved = raw === 'dark' || raw === 'light' ? raw : null;
     if (saved) setThemeState(saved);
     const savedHue = localStorage.getItem('ar-accent-hue');
     if (savedHue) setAccentHueState(Number(savedHue));
