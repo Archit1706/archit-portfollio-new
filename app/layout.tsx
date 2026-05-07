@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Fraunces, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
+import { PageTransition } from '@/components/page-transition';
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -36,7 +37,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${fraunces.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} dark`}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <PageTransition>{children}</PageTransition>
+        </ThemeProvider>
       </body>
     </html>
   );

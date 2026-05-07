@@ -35,6 +35,7 @@ html.light {
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 body {
   font-family: var(--font-space-grotesk), system-ui, sans-serif;
   background: var(--bg);
@@ -230,3 +231,24 @@ a, button { cursor: none; }
   transition: width 0.4s var(--ease);
 }
 .nav-link:hover::after { width: 100%; }
+
+/* Page transition */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes page-exit {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-10px); }
+}
+.page-enter {
+  animation: page-enter 0.45s var(--ease) both;
+}
+
+/* View transitions (Chrome 111+) */
+::view-transition-old(root) {
+  animation: 300ms var(--ease) both page-exit;
+}
+::view-transition-new(root) {
+  animation: 450ms var(--ease) both page-enter;
+}
