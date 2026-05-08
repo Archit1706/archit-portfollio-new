@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { PROJECTS } from '@/lib/projects-data';
+import { RESEARCH } from '@/lib/research-data';
 import { SITE_URL } from '@/lib/seo';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -27,5 +28,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: p.featured ? 0.85 : 0.75,
   }));
 
-  return [...staticRoutes, ...projectRoutes];
+  const researchRoutes: MetadataRoute.Sitemap = RESEARCH.map((r) => ({
+    url: `${SITE_URL}/research/${r.slug}`,
+    lastModified: new Date(r.date),
+    changeFrequency: 'monthly' as const,
+    priority: r.status === 'published' ? 0.85 : 0.75,
+  }));
+
+  return [...staticRoutes, ...projectRoutes, ...researchRoutes];
 }

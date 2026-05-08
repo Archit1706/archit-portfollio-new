@@ -11,6 +11,7 @@ export const AUTHOR = {
   linkedin: 'https://www.linkedin.com/in/archit-rathod/',
   twitter: 'https://twitter.com/ArchitRathod_17',
   leetcode: 'https://leetcode.com/Archit176/',
+  scholar: 'https://scholar.google.com/citations?user=dgd_6_8AAAAJ&hl=en',
 };
 
 export const DEFAULT_OG = {

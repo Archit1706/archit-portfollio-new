@@ -28,10 +28,20 @@ Machine Learning Fairness (fairness metrics, bias detection, counterfactual gene
 
 ## Research Publications
 
-- Galaxy Morphology XAI: Explainability in Astronomical AI — Technical Report, UIC 2025 (in preparation)
-- Ascend.ai: AI-Powered Adaptive Interview Preparation Coach — ICDSA 2024
-- Automated Disaster Image Classification Using Deep Learning — ICSISCET 2023
-- Multi-Agent Simulators for Emergent Social Network Dynamics — NeurIPS 2023 MASec Workshop
+### Peer-Reviewed & Published
+
+- [Multiagent Simulators for Social Networks](https://architr.vercel.app/research/multiagent-simulators-social-networks): NeurIPS 2023 MASec Workshop. arXiv:2311.14712. Position paper reviewing social network simulation for multiagent security using LLM-based agent-based models.
+- [Leveraging CNNs and Ensemble Learning for Automated Disaster Image Classification](https://architr.vercel.app/research/cnn-disaster-classification): ICSISCET 2023, Springer Nature, pp. 311–326. Stacked CNN + XGBoost ensemble achieving 95% accuracy on earthquake/flood/wildfire/volcano image classification.
+- [Ascend.AI — Building Confidence Through Technology](https://architr.vercel.app/research/ascend-ai-interview-preparation): ICDSA 2024, Springer Nature, pp. 63–77. Facial expression analysis (OpenCV + Xception), tone/pitch analysis (LIBROSA + 1D-CNN), and LLM chatbot (Mixtral 8x7b + Qdrant) for interview preparation.
+
+### Technical Reports
+
+- [Responsible AI for Galaxy Morphology Classification](https://architr.vercel.app/research/responsible-ai-galaxy-morphology): UIC 2025. Comparative study of Grad-CAM, LIME, Integrated Gradients, and GradientSHAP across ResNet-18, VGG-16, EfficientNet-B0, Custom CNN on Galaxy10 DECaLS. No single explainer dominates universally.
+- [LLM Toxicity Mitigation: DExperts Replication](https://architr.vercel.app/research/llm-toxicity-dexperts-replication): UIC 2024. Replication study of DExperts on GPT-2. 100% safety on explicit toxicity; 98.5% on adversarial implicit hate speech (ToxiGen); ~10x latency penalty.
+- [HTE Benchmarking in Networks](https://architr.vercel.app/research/hte-benchmarking-networks): UIC 2024. Benchmarking X-Learner, T-Learner, and Causal Forest for heterogeneous treatment effect estimation across synthetic, semi-synthetic, and real-world social network datasets.
+- [YouTube Misinformation Detection](https://architr.vercel.app/research/youtube-misinformation-detection): UIC 2025. Multi-method analysis of 5.9M comments across 440k videos. Combines PageRank centrality, Isolation Forest anomaly detection, and BERTopic for coordinated amplification detection.
+
+- [Google Scholar profile](https://scholar.google.com/citations?user=dgd_6_8AAAAJ&hl=en): Full publication list with citations.
 
 ## Professional Experience
 
