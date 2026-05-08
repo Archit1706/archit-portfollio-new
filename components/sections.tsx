@@ -12,6 +12,7 @@ import { FairLintWidget } from './fairlint';
 import { GalaxyXAIWidget } from './widgets/project-widgets';
 import { useTheme } from './theme-provider';
 import { PROJECTS } from '@/lib/projects-data';
+import { RESEARCH, PUBLISHED } from '@/lib/research-data';
 
 /* =========================================================
    STREAMING HERO TEXT
@@ -508,30 +509,86 @@ export function Skills() {
 /* =========================================================
    RESEARCH
    ========================================================= */
-const research = [
-  { year: '2025', venue: 'Technical Report · UIC 2025', title: 'Galaxy Morphology Classification with Explainable AI', desc: 'Systematic evaluation of Grad-CAM, LIME, Integrated Gradients, and GradientSHAP across four CNNs on Galaxy10 DECaLS and Galaxy Zoo Evo. Quantitative faithfulness metrics reveal no universal winner — architecture, dataset, and criterion jointly determine the best explanation method.' },
-  { year: '2024', venue: 'ICDSA 2024 · Springer', title: 'Ascend.ai', desc: 'Technical exploration of facial expression, tone, and pitch analysis with chatbot guidance for interview preparation.' },
-  { year: '2024', venue: 'ICSISCET 2023 · Springer', title: 'Automated Disaster Image Classification', desc: 'Stacked CNN + XGBoost ensemble for earthquake / flood / wildfire / volcano imagery. 95% accuracy, F1 up to 0.96.' },
-  { year: '2023', venue: 'NeurIPS 2023 · MASec', title: 'Multi-Agent Simulators for Social Networks', desc: 'Position paper reviewing multiagent security via agent-based models of social networks, bridging public/private platform gaps.' },
-];
+const STATUS_DOT: Record<string, string> = {
+  published: 'var(--accent)',
+  preprint: 'oklch(0.72 0.15 60)',
+  report: 'var(--border-strong)',
+};
 
 export function Research() {
   return (
     <section id="research" className="relative px-6 md:px-10 max-w-[1400px] mx-auto py-24">
-      <SectionHeader idx="05" kicker="research publications" title={<>Written down, peer-reviewed, <em style={{ fontStyle: 'italic' }}>shipped</em>.</>} subtitle="Four papers across explainable AI for astronomy, responsible AI, disaster response, and social-network simulation." />
+      <SectionHeader
+        idx="05"
+        kicker="research"
+        title={<>Written. Reviewed. <em style={{ fontStyle: 'italic' }}>Built.</em></>}
+        subtitle={`${PUBLISHED.length} peer-reviewed publications + ${RESEARCH.length - PUBLISHED.length} technical reports across explainable AI, responsible ML, disaster response, social networks, and causal inference.`}
+      />
       <div className="space-y-0">
-        {research.map((r, i) => (
-          <a key={i} href="#" className="smooth group grid md:grid-cols-12 gap-6 items-baseline py-7 relative" style={{ borderTop: '1px solid var(--border)' }} data-hover>
-            <div className="md:col-span-1 font-mono text-[11px]" style={{ color: 'var(--text-muted)' }}>{r.year}</div>
-            <div className="md:col-span-4 font-mono text-[11px] uppercase tracking-[0.14em]" style={{ color: 'var(--accent)' }}>{r.venue}</div>
-            <div className="md:col-span-6">
-              <h3 className="font-serif text-2xl tracking-tight mb-2 smooth group-hover:translate-x-1">{r.title}</h3>
-              <p className="text-[14px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>{r.desc}</p>
+        {RESEARCH.map((r) => (
+          <Link
+            key={r.slug}
+            href={`/research/${r.slug}`}
+            className="smooth group grid md:grid-cols-12 gap-6 items-start py-7 relative"
+            style={{ borderTop: '1px solid var(--border)' }}
+            data-hover
+          >
+            <div className="md:col-span-1 font-mono text-[11px] pt-1" style={{ color: 'var(--text-muted)' }}>{r.year}</div>
+            <div className="md:col-span-3">
+              <span
+                className="font-mono text-[10px] uppercase tracking-[0.14em] flex items-center gap-1.5"
+                style={{ color: r.status === 'published' ? 'var(--accent)' : 'var(--text-muted)' }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: STATUS_DOT[r.status] }} />
+                {r.venueShort}
+              </span>
             </div>
-            <div className="md:col-span-1 flex md:justify-end"><IconArrowUpRight size={18} /></div>
-          </a>
+            <div className="md:col-span-7">
+              <h3
+                className="font-serif text-xl md:text-2xl tracking-tight mb-1.5 smooth"
+                style={{ transform: 'translateX(0)', transition: 'transform 0.3s var(--ease)' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateX(4px)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'translateX(0)'; }}
+              >
+                {r.shortTitle}
+              </h3>
+              <p className="text-[13px] leading-relaxed line-clamp-2" style={{ color: 'var(--text-muted)' }}>
+                {r.abstract.slice(0, 140)}…
+              </p>
+              <div className="flex flex-wrap gap-1 mt-2">
+                {r.authors.map((a) => (
+                  <span key={a} className="font-mono text-[10px]"
+                    style={{ color: a === 'Archit Rathod' ? 'var(--accent)' : 'var(--text-faint)' }}>
+                    {a}{a !== r.authors[r.authors.length - 1] ? ' ·' : ''}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="md:col-span-1 flex md:justify-end pt-1">
+              <IconArrowUpRight size={16} />
+            </div>
+          </Link>
         ))}
         <div style={{ borderTop: '1px solid var(--border)' }} />
+      </div>
+
+      <div className="mt-8 flex items-center gap-4 font-mono text-[11px]" style={{ color: 'var(--text-muted)' }}>
+        <span className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--accent)' }} /> peer-reviewed
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--border-strong)' }} /> technical report
+        </span>
+        <a
+          href="https://scholar.google.com/citations?user=dgd_6_8AAAAJ&hl=en"
+          target="_blank"
+          rel="noreferrer"
+          className="ml-auto flex items-center gap-1.5 smooth"
+          style={{ color: 'var(--text-muted)' }}
+          data-hover
+        >
+          Google Scholar <IconArrowUpRight size={12} />
+        </a>
       </div>
     </section>
   );
