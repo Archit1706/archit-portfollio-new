@@ -1,0 +1,51 @@
+# Archit Rathod
+
+> Software engineer and ML fairness researcher. MS Computer Science at University of Illinois Chicago (UIC). Building tools where scale and responsibility share the same codebase.
+
+Archit Rathod is a graduate student and researcher at UIC specializing in algorithmic fairness, AI explainability (XAI), and scalable data engineering. He has shipped 29+ projects spanning machine learning research, full-stack web applications, geospatial systems, and developer tooling. His research asks a single question across every domain: how do we build systems that stay accountable at scale?
+
+## Featured Research & Projects
+
+- [Galaxy Morphology XAI](https://architr.vercel.app/project/galaxy-morphology-xai): Systematic evaluation of Grad-CAM, LIME, Integrated Gradients, and GradientSHAP across four CNN architectures (ResNet-18, VGG-16, EfficientNet-B0, Custom CNN) on Galaxy Zoo DECaLS and Galaxy Zoo Evo datasets for Rubin LSST-scale astronomical classification. Best accuracy: 96.1% (ResNet-18). Best Deletion AUC: 0.32 (Grad-CAM). Best Insertion AUC: 0.89 (GradientSHAP). No single explainability method dominates universally.
+- [FairLint DL](https://architr.vercel.app/project/fairlint-dl): VS Code extension implementing deep-learning-based fairness debugging. Wraps a custom PyTorch DNN around a two-phase gradient-ascent counterfactual search. Reduces ML auditing time by 40%. Supports 12 fairness metrics. Surfaces causal bias explanations in the editor in real time.
+- [OSM Temporary Road Closures](https://architr.vercel.app/project/osm-temporary-road-closures): Full-stack AGPL geospatial platform built for the OpenStreetMap Foundation during Google Summer of Code 2025. Next.js + Leaflet frontend, FastAPI + PostgreSQL/PostGIS backend. Handles 12k+ locations with OpenLR encoding (map-provider-agnostic) and Valhalla routing for auto, bicycle, and pedestrian modes. 3.2k routes/day, 94ms p99 latency.
+- [Keya AI](https://architr.vercel.app/project/keya-ai): Agentic AI real-estate assistant using LangChain, Azure OpenAI, and vector databases. Covers 1,000+ ZIP codes with personalized property recommendations, transit data, and dual chat interfaces (agent-side and property-specific). 8 agent tools, 4 languages.
+- [FairLend Miners](https://architr.vercel.app/project/fairlend-miners): Data mining investigation of racial and gender disparity in U.S. mortgage lending using HMDA 2023 data. PySpark pipeline on 10M+ records. Fair lending model reduces demographic disparity from 9.63% to 8.00%.
+- [GreenPipe](https://architr.vercel.app/project/green-pipe): Carbon-aware CI/CD pipeline optimization. Reduces pipeline SCI score by 31% through intelligent job deferral and agent-driven emission scheduling.
+
+## All Projects
+
+- [Full project archive](https://architr.vercel.app/projects): 29 projects across AI/ML, full-stack web, urban analytics, and research (2021–2026).
+
+## Technical Expertise
+
+Machine Learning Fairness (fairness metrics, bias detection, counterfactual generation, causal DAGs), AI Explainability (Grad-CAM, LIME, Integrated Gradients, GradientSHAP, Captum), Data Engineering (Apache Spark, PySpark, PostgreSQL, PostGIS, Redis, Docker), Full-Stack (Next.js, TypeScript, React, FastAPI, Flask, Node.js), Computer Vision (PyTorch, OpenCV, CNNs, transfer learning), Natural Language Processing (LangChain, Azure OpenAI, vector databases, RAG), Geospatial (Leaflet, PostGIS, OpenLR, Valhalla), Research (statistical significance testing, Wilcoxon signed-rank, McNemar tests).
+
+## Education
+
+- MS Computer Science — University of Illinois Chicago (UIC), 2024–2026. Focus: ML fairness, data engineering, distributed systems.
+- BE Information Technology — TSEC / University of Mumbai, 2020–2024.
+
+## Research Publications
+
+- Galaxy Morphology XAI: Explainability in Astronomical AI — Technical Report, UIC 2025 (in preparation)
+- Ascend.ai: AI-Powered Adaptive Interview Preparation Coach — ICDSA 2024
+- Automated Disaster Image Classification Using Deep Learning — ICSISCET 2023
+- Multi-Agent Simulators for Emergent Social Network Dynamics — NeurIPS 2023 MASec Workshop
+
+## Professional Experience
+
+- Research Assistant — Urban Transportation Center, UIC (Aug 2025–present). Python pipelines on 8.5M+ OD pairs, 300GB+ data.
+- Software Engineering Intern — Simulation & Synthesis Corp (May 2025–Aug 2025). Real-time LIDAR + GPS pipeline.
+- Google Summer of Code Contributor — OpenStreetMap Foundation (May 2025–Aug 2025). OSM Temporary Road Closures platform.
+- ML Research Intern — BracU Robotics & AI Lab (May 2024–Aug 2024). NLP, adversarial robustness.
+- Web Development Intern — Almighty Coders (Jun 2023–Aug 2023). Full-stack MERN applications.
+
+## Contact & Profiles
+
+- Portfolio: https://architr.vercel.app
+- All Projects: https://architr.vercel.app/projects
+- Email: arath21@uic.edu
+- GitHub: https://github.com/Archit1706
+- LinkedIn: https://www.linkedin.com/in/archit-rathod/
+- Twitter/X: https://twitter.com/ArchitRathod_17
