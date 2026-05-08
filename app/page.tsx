@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useTheme } from '@/components/theme-provider';
 import { TweaksPanel, TweakSection, TweakSlider, TweakToggle } from '@/components/tweaks-panel';
 import { Nav, Hero, Marquee, Work, Experience, Skills, Research, Contact } from '@/components/sections';
+import { CuriositySpark } from '@/components/curiosity-spark';
 
 export default function Home() {
   const { theme, setTheme, showGrid, setShowGrid, ambientGlow, setAmbientGlow, customCursor, setCustomCursor, accentHue, setAccentHue } = useTheme();
@@ -55,6 +56,8 @@ export default function Home() {
           <div className="reveal"><Contact /></div>
         </main>
       </div>
+
+      <CuriositySpark />
 
       <TweaksPanel title="Tweaks" defaultOpen={false}>
         <TweakSection title="Theme">

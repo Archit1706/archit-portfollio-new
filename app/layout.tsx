@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { PageTransition } from '@/components/page-transition';
 import { CursorWrapper } from '@/components/cursor-wrapper';
+import { StarField } from '@/components/star-field';
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${fraunces.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} dark`}
       >
         <ThemeProvider>
+          <StarField />
           <CursorWrapper />
           <PageTransition>{children}</PageTransition>
         </ThemeProvider>

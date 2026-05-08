@@ -232,6 +232,16 @@ a, button { cursor: none; }
 }
 .nav-link:hover::after { width: 100%; }
 
+/* Curiosity spark panel */
+@keyframes spark-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes spark-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.3); }
+}
+
 /* Page transition */
 @keyframes page-enter {
   from { opacity: 0; transform: translateY(16px); }
