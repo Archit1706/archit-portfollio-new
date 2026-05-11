@@ -107,6 +107,7 @@ export function Nav() {
           className="smooth flex items-center gap-2 px-3 py-2 rounded-md font-mono text-[11px]"
           style={{ border: '1px solid var(--border-strong)' }}
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           data-hover
         >
           {theme === 'dark' ? <IconSun size={13} /> : <IconMoon size={13} />}
@@ -145,7 +146,7 @@ export function Hero() {
           <div className="font-mono text-[11px] mb-5" style={{ color: 'var(--accent)' }}>
             <span style={{ color: 'var(--text-muted)' }}>01 /</span>&nbsp; archit rathod
           </div>
-          <h1 className="font-serif tracking-tight" style={{ fontSize: 'clamp(44px, 7vw, 96px)', lineHeight: 1.02, fontWeight: 400, letterSpacing: '-0.02em' }}>
+          <h1 className="font-serif tracking-tight" style={{ fontSize: 'clamp(34px, 5vw, 72px)', lineHeight: 1.02, fontWeight: 400, letterSpacing: '-0.02em' }}>
             <StreamText text="Architecting cloud-native systems. Debugging algorithmic fairness." speed={32} onDone={() => setStreamDone(true)} />
           </h1>
           <p className="mt-8 max-w-[620px]" style={{ fontSize: '17px', lineHeight: 1.6, color: 'var(--text-muted)', opacity: streamDone ? 1 : 0, transform: streamDone ? 'translateY(0)' : 'translateY(8px)', transition: 'all 0.8s var(--ease)' }}>
@@ -626,7 +627,7 @@ export function Contact() {
           <p className="mt-6 max-w-[520px] text-[16px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
             I&apos;m actively interviewing for summer / full-time roles in AI infrastructure, fairness tooling, and applied ML. Let&apos;s find a problem worth debugging together.
           </p>
-          <button onClick={copy} className="glass smooth mt-8 rounded-xl flex items-center gap-4 p-5 group w-full max-w-[520px]" data-hover>
+          <button onClick={copy} className="glass smooth mt-8 rounded-xl flex items-center gap-4 p-5 group w-full max-w-[520px]" aria-label="Copy email address" data-hover>
             <IconMail size={20} />
             <div className="flex-1 text-left">
               <div className="font-mono text-[10px] uppercase tracking-[0.14em]" style={{ color: 'var(--text-muted)' }}>email · one-click copy</div>

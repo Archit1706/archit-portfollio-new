@@ -42,8 +42,13 @@ export function StarField() {
 
     const isDark = theme === 'dark';
     const starColor = isDark ? '255,255,255' : '30,30,50';
+    const isMobile = W < 768;
 
-    const COUNT = Math.min(140, Math.floor((W * H) / 8000));
+    // Fewer particles on mobile to reduce paint load
+    const COUNT = isMobile
+      ? Math.min(60, Math.floor((W * H) / 12000))
+      : Math.min(120, Math.floor((W * H) / 9000));
+
     const particles: Particle[] = Array.from({ length: COUNT }, () => {
       const depth = Math.random();
       return {
@@ -63,8 +68,14 @@ export function StarField() {
 
     let frame = 0;
     let raf: number;
+    let paused = false;
 
     function draw() {
+      if (paused) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
+
       ctx!.clearRect(0, 0, W, H);
 
       for (const p of particles) {
@@ -137,7 +148,14 @@ export function StarField() {
       raf = requestAnimationFrame(draw);
     }
 
-    raf = requestAnimationFrame(draw);
+    // Pause when tab is hidden to save CPU
+    const onVisibility = () => { paused = document.hidden; };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    // Defer start until after page is interactive
+    const startId = setTimeout(() => {
+      raf = requestAnimationFrame(draw);
+    }, 500);
 
     const onResize = () => {
       W = window.innerWidth;
@@ -148,8 +166,10 @@ export function StarField() {
     window.addEventListener('resize', onResize, { passive: true });
 
     return () => {
+      clearTimeout(startId);
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [theme]);
 
@@ -163,6 +183,7 @@ export function StarField() {
         zIndex: 0,
         pointerEvents: 'none',
         opacity: 0.7,
+        willChange: 'transform',
       }}
     />
   );
