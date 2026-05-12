@@ -34,24 +34,47 @@ function ReadingProgress() {
 }
 
 function TableOfContents({ toc, activeId }: { toc: TocItem[]; activeId: string }) {
+  const listRef = useRef<HTMLUListElement>(null);
+
+  // Keep active item scrolled into view inside the TOC panel
+  useEffect(() => {
+    if (!listRef.current || !activeId) return;
+    const activeEl = listRef.current.querySelector(`[data-id="${activeId}"]`) as HTMLElement | null;
+    activeEl?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [activeId]);
+
   if (toc.length === 0) return null;
+
+  function handleClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
+    e.preventDefault();
+    const target = document.getElementById(id);
+    if (!target) return;
+    const navHeight = 72;
+    const top = target.getBoundingClientRect().top + window.scrollY - navHeight;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+
   return (
     <nav aria-label="Table of contents">
       <div className="font-mono text-[10px] uppercase tracking-[0.2em] mb-3" style={{ color: 'var(--text-muted)' }}>
         contents
       </div>
-      <ul className="space-y-1">
+      <ul ref={listRef} className="space-y-0.5 max-h-[60vh] overflow-y-auto scrollbar-hide">
         {toc.map((item) => {
           const isActive = activeId === item.id;
           return (
-            <li key={item.id} style={{ paddingLeft: item.level === 1 ? 0 : item.level === 2 ? 12 : 24 }}>
+            <li key={item.id} data-id={item.id} style={{ paddingLeft: item.level === 1 ? 0 : item.level === 2 ? 12 : 24 }}>
               <a
                 href={`#${item.id}`}
-                className="block font-mono text-[11px] leading-snug py-0.5 smooth truncate"
+                onClick={(e) => handleClick(e, item.id)}
+                className="block font-mono text-[11px] leading-snug py-1 smooth"
                 style={{
                   color: isActive ? 'var(--accent)' : 'var(--text-faint)',
                   borderLeft: isActive ? '2px solid var(--accent)' : '2px solid transparent',
-                  paddingLeft: 8,
+                  paddingLeft: 10,
+                  background: isActive ? 'var(--accent-soft)' : 'transparent',
+                  borderRadius: '0 4px 4px 0',
+                  fontWeight: isActive ? 500 : 400,
                 }}
                 data-hover
               >
@@ -137,21 +160,30 @@ export function BlogPostClient({
   const [tocOpen, setTocOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Track active heading via IntersectionObserver
+  // Track active heading by scroll position — always has an active item,
+  // works correctly for headings near the bottom that can never reach the top.
   useEffect(() => {
     if (!contentRef.current || toc.length === 0) return;
-    const headings = contentRef.current.querySelectorAll('h1[id],h2[id],h3[id]');
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting);
-        if (visible.length > 0) {
-          setActiveId(visible[0].target.id);
-        }
-      },
-      { rootMargin: '0px 0px -70% 0px', threshold: 0 }
-    );
-    headings.forEach((h) => obs.observe(h));
-    return () => obs.disconnect();
+
+    const NAV_OFFSET = 96; // sticky nav height + breathing room
+
+    const updateActive = () => {
+      const headings = Array.from(
+        contentRef.current!.querySelectorAll<HTMLElement>('h1[id],h2[id],h3[id]')
+      );
+      if (headings.length === 0) return;
+
+      const scrollY = window.scrollY + NAV_OFFSET;
+      let current = headings[0];
+      for (const h of headings) {
+        if (h.offsetTop <= scrollY) current = h;
+      }
+      setActiveId(current.id);
+    };
+
+    updateActive(); // set on mount
+    window.addEventListener('scroll', updateActive, { passive: true });
+    return () => window.removeEventListener('scroll', updateActive);
   }, [toc]);
 
   const copyUrl = useCallback(async () => {
