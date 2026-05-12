@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { PROJECTS } from '@/lib/projects-data';
 import { RESEARCH } from '@/lib/research-data';
+import { getAllPosts } from '@/lib/blog-utils';
 import { SITE_URL } from '@/lib/seo';
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -15,6 +16,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${SITE_URL}/projects`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/blogs`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.9,
@@ -35,5 +42,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: r.status === 'published' ? 0.85 : 0.75,
   }));
 
-  return [...staticRoutes, ...projectRoutes, ...researchRoutes];
+  const blogRoutes: MetadataRoute.Sitemap = getAllPosts().map((p) => ({
+    url: `${SITE_URL}/blogs/${p.slug}`,
+    lastModified: new Date(p.date),
+    changeFrequency: 'monthly' as const,
+    priority: p.featured ? 0.85 : 0.75,
+  }));
+
+  return [...staticRoutes, ...projectRoutes, ...researchRoutes, ...blogRoutes];
 }
