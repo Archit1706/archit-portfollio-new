@@ -20,27 +20,13 @@ export interface ResearchPaper {
 
 export const RESEARCH: ResearchPaper[] = [
   {
-    slug: 'youtube-misinformation-detection',
-    title: 'Coordinated Amplification and Misinformation Detection in Global YouTube Conflict Narratives',
-    shortTitle: 'YouTube Misinformation Detection',
-    authors: ['Archit Rathod', 'Srinath Ganesh', 'Vishaal Dayashanker', 'Harsh Shelke', 'Vignesh Pathak'],
-    year: '2025',
-    date: '2025-12-09',
-    venue: 'CS 418 · UIC Fall 2025',
-    venueShort: 'Course Project',
-    status: 'report',
-    abstract:
-      'YouTube serves as a major conduit for viral, multilingual political narratives, particularly during global conflicts. This project investigates coordinated amplification patterns and misinformation detection in YouTube content related to the Russia-Ukraine conflict. We analyzed approximately 5.9 million comments across 440,772 videos from 1,561 channels using a multi-method approach combining network science, anomaly detection, and natural language processing. Our findings validate three core hypotheses: (1) misinformation is amplified by highly interconnected channel and commenter clusters, (2) periods of intense real-world conflict correlate with statistically significant engagement anomalies, and (3) narratives evolve predictably over time in alignment with external war events. The project demonstrates the effectiveness of combining PageRank centrality analysis, Isolation Forest anomaly detection, and BERTopic modeling for detecting coordinated information campaigns at scale.',
-    keywords: ['Misinformation Detection', 'YouTube', 'Network Science', 'PageRank', 'BERTopic', 'Anomaly Detection', 'NLP', 'Russia-Ukraine Conflict'],
-  },
-  {
     slug: 'responsible-ai-galaxy-morphology',
     title: 'Responsible AI for Scientific Discovery: Evaluating Explainability Methods for Galaxy Morphology Classification across Multiple Architectures and Datasets',
     shortTitle: 'Galaxy Morphology XAI',
     authors: ['Gargi Sathe', 'Archit Rathod'],
     year: '2026',
     date: '2026-05-01',
-    venue: 'Technical Report · UIC 2026',
+    venue: 'Technical Report · UIC Spring 2026',
     venueShort: 'Technical Report',
     status: 'report',
     abstract:
@@ -54,12 +40,27 @@ export const RESEARCH: ResearchPaper[] = [
     authors: ['Mokshit Surana', 'Archit Rathod', 'Akshaj Kurra Satishkumar'],
     year: '2025',
     date: '2025-12-01',
-    venue: 'Technical Report · UIC 2025',
+    venue: 'Technical Report · UIC Fall 2025',
     venueShort: 'Technical Report',
     status: 'report',
+    arxiv: 'https://arxiv.org/abs/2605.14087',
     abstract:
       'Large Language Models (LLMs), when trained on web-scale corpora, inherently absorb toxic patterns from their training data. This leads to "toxic degeneration" where even innocuous prompts can trigger harmful outputs. This phenomenon poses significant risks for real-world deployments, necessitating effective mitigation strategies that maintain model utility while ensuring safety. In this comprehensive replication study, we evaluate the efficacy of DExperts (Decoding-time Experts), an inference-time mitigation technique that steers generation without requiring model retraining. We structured our research into three systematic phases: (1) establishing baseline toxicity measurements using RealToxicityPrompts on standard GPT-2 models; (2) implementing and evaluating DExperts to mitigate explicit toxicity; and (3) stress-testing the method against implicit hate speech using the adversarial ToxiGen dataset. Our empirical results confirm that while DExperts achieves near-perfect safety rates (100%) on explicit toxicity benchmarks, it exhibits brittleness against adversarial, implicit hate speech, with safety rates dropping to 98.5%. Furthermore, we quantify a critical trade-off: the method introduces a ~10x latency penalty (from 0.2s to 2.0s per generation), posing challenges for real-time deployment scenarios.',
     keywords: ['LLM Safety', 'Toxicity Mitigation', 'DExperts', 'GPT-2', 'ToxiGen', 'RealToxicityPrompts', 'AI Safety', 'Responsible AI'],
+  },
+  {
+    slug: 'youtube-misinformation-detection',
+    title: 'Coordinated Amplification and Misinformation Detection in Global YouTube Conflict Narratives',
+    shortTitle: 'YouTube Misinformation Detection',
+    authors: ['Archit Rathod', 'Srinath Ganesh', 'Vishaal Dayashanker', 'Harsh Shelke', 'Vignesh Pathak'],
+    year: '2025',
+    date: '2025-12-09',
+    venue: 'CS 418 · UIC Fall 2025',
+    venueShort: 'Course Project',
+    status: 'report',
+    abstract:
+      'YouTube serves as a major conduit for viral, multilingual political narratives, particularly during global conflicts. This project investigates coordinated amplification patterns and misinformation detection in YouTube content related to the Russia-Ukraine conflict. We analyzed approximately 5.9 million comments across 440,772 videos from 1,561 channels using a multi-method approach combining network science, anomaly detection, and natural language processing. Our findings validate three core hypotheses: (1) misinformation is amplified by highly interconnected channel and commenter clusters, (2) periods of intense real-world conflict correlate with statistically significant engagement anomalies, and (3) narratives evolve predictably over time in alignment with external war events. The project demonstrates the effectiveness of combining PageRank centrality analysis, Isolation Forest anomaly detection, and BERTopic modeling for detecting coordinated information campaigns at scale.',
+    keywords: ['Misinformation Detection', 'YouTube', 'Network Science', 'PageRank', 'BERTopic', 'Anomaly Detection', 'NLP', 'Russia-Ukraine Conflict'],
   },
   {
     slug: 'hte-benchmarking-networks',
@@ -100,6 +101,27 @@ export const RESEARCH: ResearchPaper[] = [
 }`,
   },
   {
+    slug: 'multiagent-simulators-social-networks',
+    title: 'Multiagent Simulators for Social Networks',
+    shortTitle: 'Multiagent Social Simulators',
+    authors: ['Aditya Surve', 'Archit Rathod', 'Mokshit Surana', 'Gautam Malpani', 'Aneesh Shamraj', 'Sainath Reddy Sankepally', 'Raghav Jain', 'Swapneel S Mehta'],
+    year: '2023',
+    date: '2023-11-16',
+    venue: 'NeurIPS 2023 · MASec Workshop',
+    venueShort: 'NeurIPS 2023',
+    status: 'published',
+    abstract:
+      'Multiagent social network simulations are an avenue that can bridge the communication gap between the public and private platforms in order to develop solutions to a complex array of issues relating to online safety. While there are significant challenges relating to the scale of multiagent simulations, efficient learning from observational and interventional data to accurately model micro and macro-level emergent effects, there are equally promising opportunities — not least with the advent of large language models that provide an expressive approximation of user behavior. In this position paper, we review prior art relating to social network simulation, highlighting challenges and opportunities for future work exploring multiagent security using agent-based models of social networks.',
+    keywords: ['Multiagent Systems', 'Social Network Simulation', 'LLMs', 'Online Safety', 'Agent-Based Models', 'Emergent Behavior', 'Network Security'],
+    arxiv: 'https://arxiv.org/abs/2311.14712',
+    bibtex: `@article{surve2023multiagent,
+  title   = {Multiagent Simulators for Social Networks},
+  author  = {Surve, Aditya and Rathod, Archit and Surana, Mokshit and Malpani, Gautam and Shamraj, Aneesh and Sankepally, Sainath Reddy and Jain, Raghav and Mehta, Swapneel S},
+  journal = {arXiv preprint arXiv:2311.14712},
+  year    = {2023}
+}`,
+  },
+  {
     slug: 'cnn-disaster-classification',
     title: 'Leveraging CNNs and Ensemble Learning for Automated Disaster Image Classification',
     shortTitle: 'CNN Disaster Classification',
@@ -121,27 +143,6 @@ export const RESEARCH: ResearchPaper[] = [
   pages     = {311--326},
   year      = {2023},
   publisher = {Springer Nature Singapore}
-}`,
-  },
-  {
-    slug: 'multiagent-simulators-social-networks',
-    title: 'Multiagent Simulators for Social Networks',
-    shortTitle: 'Multiagent Social Simulators',
-    authors: ['Aditya Surve', 'Archit Rathod', 'Mokshit Surana', 'Gautam Malpani', 'Aneesh Shamraj', 'Sainath Reddy Sankepally', 'Raghav Jain', 'Swapneel S Mehta'],
-    year: '2023',
-    date: '2023-11-16',
-    venue: 'NeurIPS 2023 · MASec Workshop',
-    venueShort: 'NeurIPS 2023',
-    status: 'published',
-    abstract:
-      'Multiagent social network simulations are an avenue that can bridge the communication gap between the public and private platforms in order to develop solutions to a complex array of issues relating to online safety. While there are significant challenges relating to the scale of multiagent simulations, efficient learning from observational and interventional data to accurately model micro and macro-level emergent effects, there are equally promising opportunities — not least with the advent of large language models that provide an expressive approximation of user behavior. In this position paper, we review prior art relating to social network simulation, highlighting challenges and opportunities for future work exploring multiagent security using agent-based models of social networks.',
-    keywords: ['Multiagent Systems', 'Social Network Simulation', 'LLMs', 'Online Safety', 'Agent-Based Models', 'Emergent Behavior', 'Network Security'],
-    arxiv: 'https://arxiv.org/abs/2311.14712',
-    bibtex: `@article{surve2023multiagent,
-  title   = {Multiagent Simulators for Social Networks},
-  author  = {Surve, Aditya and Rathod, Archit and Surana, Mokshit and Malpani, Gautam and Shamraj, Aneesh and Sankepally, Sainath Reddy and Jain, Raghav and Mehta, Swapneel S},
-  journal = {arXiv preprint arXiv:2311.14712},
-  year    = {2023}
 }`,
   },
 ];

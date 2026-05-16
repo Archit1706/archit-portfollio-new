@@ -6,7 +6,7 @@ export const AUTHOR = {
   handle: '@ArchitRathod_17',
   title: 'Software Engineer & ML Fairness Researcher',
   bio: 'MS Computer Science at University of Illinois Chicago. Building tools where scale and responsibility share the same codebase.',
-  email: 'arath21@uic.edu',
+  email: 'architrathod77@gmail.com',
   github: 'https://github.com/Archit1706',
   linkedin: 'https://www.linkedin.com/in/archit-rathod/',
   twitter: 'https://twitter.com/ArchitRathod_17',
@@ -23,21 +23,67 @@ export const DEFAULT_OG = {
 
 export const KEYWORDS = [
   'Archit Rathod',
+  'arath21',
+  'Archit1706',
+  'ArchitRathod_17',
+  'architrathod77@gmail.com',
+
+  // Roles
   'ML Fairness Researcher',
   'Software Engineer',
+  'Full Stack Developer',
+  'Backend Engineer',
+  'AI Engineer',
+  'Data Scientist',
+  'AI Researcher',
+
+  // Core Domains
   'Machine Learning',
   'AI Explainability',
   'XAI',
   'Algorithmic Fairness',
+  'Responsible AI',
+  'Ethical AI',
   'Data Engineering',
-  'Next.js Developer',
-  'PyTorch',
+  'Data Mining',
   'Computer Vision',
   'NLP',
+  'Deep Learning',
+  'Distributed Systems',
+  'Generative AI',
+  'LLMs',
+
+  // Technologies
+  'Next.js Developer',
+  'React.js',
+  'TypeScript',
+  'Python',
+  'PyTorch',
+  'TensorFlow',
+  'Scikit-learn',
+  'FastAPI',
+  'Node.js',
+  'PostgreSQL',
+  'MongoDB',
+  'Docker',
+  'PostGIS',
+  'LangChain',
+  'Azure OpenAI',
+  'PySpark',
+  'OpenCV',
+  'Tailwind CSS',
+
+  // Affiliations & Projects
   'University of Illinois Chicago',
   'UIC',
   'GSoC',
+  'Google Summer of Code',
+  'GSoC 2025',
   'OpenStreetMap',
   'FairLint',
   'Galaxy Morphology',
+
+  // Misc
+  'Software Development',
+  'Tech Portfolio',
 ];
