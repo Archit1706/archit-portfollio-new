@@ -483,7 +483,46 @@ export function Skills() {
           </div>
         ))}
       </div>
-      <div className="mt-10 space-y-3">
+
+      {/* Agent Skills teaser */}
+      <div className="mt-8 relative overflow-hidden rounded-2xl" style={{ border: '1px solid var(--border)' }}>
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'linear-gradient(135deg, var(--accent-soft) 0%, transparent 60%)', opacity: 0.6 }}
+          aria-hidden="true"
+        />
+        <div className="relative flex flex-wrap items-center justify-between gap-6 p-6 md:p-8">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span style={{ color: 'var(--accent)', display: 'flex' }}><IconTerminal size={14} /></span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: 'var(--accent)' }}>
+                claude code
+              </span>
+            </div>
+            <p className="font-serif text-xl md:text-2xl leading-snug" style={{ maxWidth: '36ch' }}>
+              But what are skills without <em style={{ fontStyle: 'italic' }}>Agent Skills?</em>
+            </p>
+            <p className="mt-2 text-[13px] leading-relaxed" style={{ color: 'var(--text-muted)', maxWidth: '52ch' }}>
+              A collection of custom Claude Code skills I use daily — with copyable{' '}
+              <span className="font-mono text-[12px]" style={{ color: 'var(--text-primary)' }}>SKILL.md</span>
+              {' '}files so you can drop them straight into your own setup.
+            </p>
+          </div>
+          <Link
+            href="/agent-skills"
+            className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl font-mono text-[11px] uppercase tracking-[0.14em] smooth hover:gap-3"
+            style={{
+              background: 'var(--accent)',
+              color: 'var(--bg)',
+            }}
+            data-hover
+          >
+            view skills <IconArrowRight size={12} />
+          </Link>
+        </div>
+      </div>
+
+      <div className="mt-8 space-y-3">
         <div className="glass rounded-xl p-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: 'var(--text-muted)' }}>m.s. computer science</div>

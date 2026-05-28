@@ -27,6 +27,7 @@ Next.js 15 App Router portfolio (React 19). All interactive components are Clien
 | `/blogs` | `app/blogs/page.tsx` |
 | `/blogs/[slug]` | `app/blogs/[slug]/page.tsx` |
 | `/research/[slug]` | `app/research/[slug]/page.tsx` |
+| `/agent-skills` | `app/agent-skills/page.tsx` |
 
 Every dynamic route follows the same server/client split: the `page.tsx` is an async Server Component that fetches data and generates metadata; it renders a `*Client` component (sibling `client.tsx`) that owns all interactivity.
 
@@ -53,6 +54,8 @@ Key functions: `getAllPosts()` (list, sorted by date desc), `getPostBySlug(slug)
 Heading IDs are injected automatically by `getPostBySlug`: `## My Section` becomes `<h2 id="my-section">`. The slug lookup first tries filename, then scans frontmatter `slug` fields, so filename and `slug` frontmatter don't need to match.
 
 **Research papers** — hardcoded array in `lib/research-data.ts`. Exports `ResearchPaper` interface, `RESEARCH`, `RESEARCH_BY_SLUG`, `PUBLISHED`, and `REPORTS`. To add a paper, append to `RESEARCH`; the derived exports update automatically.
+
+**Agent skills** — hardcoded array in `lib/skills-data.ts`. Exports `AgentSkill` interface, `SKILLS`, `SKILL_CATEGORIES`, and `SKILLS_BY_ID`. Each entry includes the full `skillMd` string (copyable SKILL.md content). To add a skill, append to `SKILLS`.
 
 ### SEO / metadata
 
