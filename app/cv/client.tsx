@@ -25,7 +25,7 @@ const EXPERIENCES = [
   },
   {
     when: 'May 2025 — Aug 2025',
-    role: 'Software Engineer · GSoC',
+    role: 'Open-Source Software Engineer · GSoC',
     org: 'OpenStreetMap Foundation',
     bullets: [
       'Developed RESTful API (FastAPI + PostgreSQL/PostGIS) for real-time road closure management.',
