@@ -58,7 +58,7 @@ const EXPERIENCES = [
   },
   {
     when: 'Dec 2023 — Jun 2024',
-    role: 'Software Developer',
+    role: 'AI Engineer',
     org: 'DIRL · Boston University',
     bullets: [
       'Led 14 engineers building a gamified virtual-marketplace in React.',
@@ -539,13 +539,38 @@ export function CVClient({
           .cv-body {
             grid-template-columns: minmax(0,1fr) minmax(0,2.6fr) !important;
           }
-          body {
-            background: white !important;
-            color: #111 !important;
+
+          /* Force all CSS vars to high-contrast print values */
+          html, html.light, body {
+            --bg: #ffffff !important;
+            --bg-elev: #f5f5f5 !important;
+            --text-primary: #0a0a0a !important;
+            --text-muted: #2a2a2a !important;
+            --text-faint: #444444 !important;
+            --border: #cccccc !important;
+            --border-strong: #888888 !important;
+            --accent: #1a6b3a !important;
+            --accent-soft: #e8f4ec !important;
+            background: #ffffff !important;
+            color: #0a0a0a !important;
           }
+
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+          }
+
+          /* Kill glass blur / backdrop that looks odd on paper */
+          .glass, [class*="glass"] {
+            background: transparent !important;
+            backdrop-filter: none !important;
+          }
+
+          /* Tags readable on paper */
+          .tag {
+            background: #eeeeee !important;
+            color: #222222 !important;
+            border-color: #bbbbbb !important;
           }
         }
 

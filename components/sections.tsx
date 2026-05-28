@@ -410,7 +410,7 @@ const experiences = [
   },
   {
     when: 'dec 2023 — jun 2024',
-    role: 'Software Developer',
+    role: 'AI Engineer',
     org: 'DIRL · Boston University',
     bullets: [
       'Led 14 engineers building a gamified virtual marketplace via React.',
