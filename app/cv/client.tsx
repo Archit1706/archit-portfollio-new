@@ -220,16 +220,17 @@ export function CVClient({
               style={{ fontSize: 'clamp(11px, 1.1vw, 13px)', color: 'var(--text-muted)' }}
             >
               {[
-                { href: 'mailto:architrathod77@gmail.com', icon: <IconMail size={14} />, label: 'architrathod77@gmail.com' },
-                { href: 'https://github.com/Archit1706', icon: <IconGithub size={14} />, label: 'github.com/Archit1706', external: true },
-                { href: 'https://www.linkedin.com/in/archit-rathod/', icon: <IconLinkedin size={14} />, label: 'linkedin.com/in/archit-rathod', external: true },
-                { href: 'https://scholar.google.com/citations?user=dgd_6_8AAAAJ&hl=en', icon: <IconScholar size={14} />, label: 'Google Scholar', external: true },
-                { href: 'https://architr.vercel.app', icon: <IconArrowUpRight size={14} />, label: 'architr.vercel.app', external: true },
-              ].map(({ href, icon, label, external }) => (
+                { href: 'mailto:architrathod77@gmail.com', icon: <IconMail size={14} />, label: 'architrathod77@gmail.com', labelIsUrl: true },
+                { href: 'https://github.com/Archit1706', icon: <IconGithub size={14} />, label: 'github.com/Archit1706', external: true, labelIsUrl: true },
+                { href: 'https://www.linkedin.com/in/archit-rathod/', icon: <IconLinkedin size={14} />, label: 'linkedin.com/in/archit-rathod', external: true, labelIsUrl: true },
+                { href: 'https://scholar.google.com/citations?user=dgd_6_8AAAAJ&hl=en', icon: <IconScholar size={14} />, label: 'Google Scholar', external: true, labelIsUrl: true },
+                { href: 'https://architr.vercel.app', icon: <IconArrowUpRight size={14} />, label: 'architr.vercel.app', external: true, labelIsUrl: true },
+              ].map(({ href, icon, label, external, labelIsUrl }) => (
                 <a
                   key={label}
                   href={href}
                   {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  {...(labelIsUrl ? { 'data-label-is-url': '' } : {})}
                   className="flex items-center gap-2 smooth hover:opacity-70"
                   style={{ color: 'var(--text-muted)' }}
                   data-hover
@@ -472,6 +473,7 @@ export function CVClient({
                     href={p.href}
                     className="block rounded-xl p-4 smooth hover:opacity-80"
                     style={{ border: '1px solid var(--border)', background: 'var(--bg-elev)' }}
+                    data-label-is-url
                     data-hover
                   >
                     <div className="flex items-center justify-between mb-1.5">
@@ -571,6 +573,29 @@ export function CVClient({
             background: #eeeeee !important;
             color: #222222 !important;
             border-color: #bbbbbb !important;
+          }
+
+          /* ── Clickable links in PDF ────────────────────────
+             All <a href> elements get a distinct colour + underline
+             so PDF readers render them as hyperlinks and users
+             know they can click them.                         */
+          a[href] {
+            color: #1a4f8a !important;
+            text-decoration: underline !important;
+            text-underline-offset: 2px !important;
+          }
+
+          /* For links whose visible label is NOT the URL
+             (e.g. "view paper ↑"), append the raw URL in small
+             text so the link is useful even on printed paper.
+             Contact links are excluded via [data-label-is-url]. */
+          a[href^="http"]:not([data-label-is-url])::after,
+          a[href^="https"]:not([data-label-is-url])::after {
+            content: " — " attr(href);
+            font-size: 8px;
+            color: #555555;
+            text-decoration: none;
+            word-break: break-all;
           }
         }
 
