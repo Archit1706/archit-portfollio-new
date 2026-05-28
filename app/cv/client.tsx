@@ -103,13 +103,10 @@ const SELECTED_PROJECTS = [
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="flex items-center gap-3 mb-4"
-      style={{ borderBottom: '1px solid var(--border)' }}
-    >
+    <div className="flex items-center gap-3 mb-5" style={{ borderBottom: '1px solid var(--border)' }}>
       <h2
-        className="font-mono text-[10px] uppercase tracking-[0.22em] pb-2"
-        style={{ color: 'var(--accent)' }}
+        className="font-mono uppercase tracking-[0.22em] pb-2"
+        style={{ fontSize: 'clamp(10px, 1.1vw, 12px)', color: 'var(--accent)' }}
       >
         {children}
       </h2>
@@ -189,121 +186,103 @@ export function CVClient({
       {/* ── CV document ── */}
       <div
         id="cv-document"
-        className="cv-root mx-auto px-5 md:px-10 lg:px-16 py-8 md:py-12"
-        style={{ maxWidth: 960 }}
+        className="cv-root mx-auto px-5 md:px-10 lg:px-20 py-8 md:py-14"
+        style={{ maxWidth: 1120 }}
       >
 
         {/* ══ HEADER ══════════════════════════════════════════ */}
-        <header className="mb-8 pb-6" style={{ borderBottom: '2px solid var(--border-strong)' }}>
-          <div className="flex flex-wrap items-end justify-between gap-4">
+        <header className="mb-10 pb-8" style={{ borderBottom: '2px solid var(--border-strong)' }}>
+          <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
               <h1
                 className="font-serif tracking-tight"
-                style={{ fontSize: 'clamp(28px, 5vw, 48px)', lineHeight: 1.05, letterSpacing: '-0.025em' }}
+                style={{ fontSize: 'clamp(32px, 5vw, 60px)', lineHeight: 1.0, letterSpacing: '-0.028em' }}
               >
                 Archit Rathod
               </h1>
               <p
-                className="mt-1 font-mono text-[12px] md:text-[13px] uppercase tracking-[0.18em]"
-                style={{ color: 'var(--accent)' }}
+                className="mt-2 font-mono uppercase tracking-[0.18em]"
+                style={{ fontSize: 'clamp(11px, 1.2vw, 14px)', color: 'var(--accent)' }}
               >
                 Software Engineer &amp; ML Fairness Researcher
               </p>
               <p
-                className="mt-2 text-[13px] md:text-[14px] leading-relaxed max-w-[56ch]"
-                style={{ color: 'var(--text-muted)' }}
+                className="mt-3 leading-relaxed max-w-[56ch]"
+                style={{ fontSize: 'clamp(13px, 1.4vw, 16px)', color: 'var(--text-muted)' }}
               >
                 MS Computer Science at University of Illinois Chicago. Building tools where scale and responsibility share the same codebase.
               </p>
             </div>
 
             {/* Contact block */}
-            <div className="flex flex-col gap-1.5 font-mono text-[11px]" style={{ color: 'var(--text-muted)' }}>
-              <a
-                href="mailto:architrathod77@gmail.com"
-                className="flex items-center gap-2 smooth hover:opacity-70"
-                style={{ color: 'var(--text-muted)' }}
-                data-hover
-              >
-                <IconMail size={13} />
-                architrathod77@gmail.com
-              </a>
-              <a
-                href="https://github.com/Archit1706"
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 smooth hover:opacity-70"
-                style={{ color: 'var(--text-muted)' }}
-                data-hover
-              >
-                <IconGithub size={13} />
-                github.com/Archit1706
-              </a>
-              <a
-                href="https://www.linkedin.com/in/archit-rathod/"
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 smooth hover:opacity-70"
-                style={{ color: 'var(--text-muted)' }}
-                data-hover
-              >
-                <IconLinkedin size={13} />
-                linkedin.com/in/archit-rathod
-              </a>
-              <a
-                href="https://scholar.google.com/citations?user=dgd_6_8AAAAJ&hl=en"
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 smooth hover:opacity-70"
-                style={{ color: 'var(--text-muted)' }}
-                data-hover
-              >
-                <IconScholar size={13} />
-                Google Scholar
-              </a>
-              <a
-                href="https://architr.vercel.app"
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 smooth hover:opacity-70"
-                style={{ color: 'var(--text-muted)' }}
-                data-hover
-              >
-                <IconArrowUpRight size={13} />
-                architr.vercel.app
-              </a>
+            <div
+              className="flex flex-col gap-2 font-mono"
+              style={{ fontSize: 'clamp(11px, 1.1vw, 13px)', color: 'var(--text-muted)' }}
+            >
+              {[
+                { href: 'mailto:architrathod77@gmail.com', icon: <IconMail size={14} />, label: 'architrathod77@gmail.com' },
+                { href: 'https://github.com/Archit1706', icon: <IconGithub size={14} />, label: 'github.com/Archit1706', external: true },
+                { href: 'https://www.linkedin.com/in/archit-rathod/', icon: <IconLinkedin size={14} />, label: 'linkedin.com/in/archit-rathod', external: true },
+                { href: 'https://scholar.google.com/citations?user=dgd_6_8AAAAJ&hl=en', icon: <IconScholar size={14} />, label: 'Google Scholar', external: true },
+                { href: 'https://architr.vercel.app', icon: <IconArrowUpRight size={14} />, label: 'architr.vercel.app', external: true },
+              ].map(({ href, icon, label, external }) => (
+                <a
+                  key={label}
+                  href={href}
+                  {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  className="flex items-center gap-2 smooth hover:opacity-70"
+                  style={{ color: 'var(--text-muted)' }}
+                  data-hover
+                >
+                  {icon}
+                  {label}
+                </a>
+              ))}
             </div>
           </div>
         </header>
 
         {/* ══ TWO-COLUMN BODY ══════════════════════════════════ */}
-        <div className="cv-body grid gap-8 md:gap-10" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(0,2.4fr)' }}>
+        <div className="cv-body grid gap-10 md:gap-12" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(0,2.6fr)' }}>
 
           {/* ── LEFT SIDEBAR ─────────────────────────────────── */}
-          <aside className="cv-sidebar space-y-8">
+          <aside className="cv-sidebar space-y-9">
 
             {/* Education */}
             <section>
               <SectionTitle>Education</SectionTitle>
-              <div className="space-y-5">
+              <div className="space-y-6">
                 {EDUCATION.map((e) => (
                   <div key={e.degree}>
                     <div
                       className="font-serif leading-snug"
-                      style={{ fontSize: 'clamp(13px, 1.6vw, 15px)' }}
+                      style={{ fontSize: 'clamp(14px, 1.7vw, 17px)' }}
                     >
                       {e.degree}
                     </div>
                     <div
-                      className="font-mono text-[10px] uppercase tracking-[0.12em] mt-1"
-                      style={{ color: 'var(--accent)' }}
+                      className="font-mono uppercase tracking-[0.12em] mt-1.5"
+                      style={{ fontSize: 'clamp(10px, 1vw, 12px)', color: 'var(--accent)' }}
                     >
                       {e.school}
                     </div>
-                    <div className="font-mono text-[10px] mt-0.5" style={{ color: 'var(--text-faint)' }}>
+                    <div
+                      className="font-mono mt-0.5"
+                      style={{ fontSize: 'clamp(10px, 1vw, 11px)', color: 'var(--text-faint)' }}
+                    >
                       {e.period}
                     </div>
-                    <p className="text-[12px] mt-1.5 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                    <p
+                      className="mt-2 leading-relaxed"
+                      style={{ fontSize: 'clamp(11px, 1.1vw, 13px)', color: 'var(--text-muted)' }}
+                    >
                       {e.focus}
                     </p>
                     {e.gpa && (
-                      <div className="font-mono text-[10px] mt-1" style={{ color: 'var(--text-muted)' }}>
+                      <div
+                        className="font-mono mt-1"
+                        style={{ fontSize: 'clamp(10px, 1vw, 11px)', color: 'var(--text-muted)' }}
+                      >
                         GPA {e.gpa}
                       </div>
                     )}
@@ -319,14 +298,18 @@ export function CVClient({
                 {SKILLS.map((g) => (
                   <div key={g.label}>
                     <div
-                      className="font-mono text-[10px] uppercase tracking-[0.16em] mb-1.5"
-                      style={{ color: 'var(--text-muted)' }}
+                      className="font-mono uppercase tracking-[0.16em] mb-2"
+                      style={{ fontSize: 'clamp(10px, 1vw, 11px)', color: 'var(--text-muted)' }}
                     >
                       {g.label}
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {g.items.map((t) => (
-                        <span key={t} className="tag" style={{ fontSize: '10px', padding: '2px 6px' }}>
+                        <span
+                          key={t}
+                          className="tag"
+                          style={{ fontSize: 'clamp(10px, 1vw, 11px)', padding: '2px 7px' }}
+                        >
                           {t}
                         </span>
                       ))}
@@ -339,7 +322,7 @@ export function CVClient({
             {/* Quick stats */}
             <section>
               <SectionTitle>At a Glance</SectionTitle>
-              <div className="space-y-2 font-mono text-[11px]">
+              <div className="space-y-2 font-mono">
                 {[
                   ['Publications', `${publishedCount} peer-reviewed`],
                   ['Reports', `${research.length - publishedCount} technical`],
@@ -349,8 +332,8 @@ export function CVClient({
                 ].map(([k, v]) => (
                   <div
                     key={k}
-                    className="flex items-center justify-between py-1"
-                    style={{ borderBottom: '1px solid var(--border)' }}
+                    className="flex items-center justify-between py-1.5"
+                    style={{ borderBottom: '1px solid var(--border)', fontSize: 'clamp(10px, 1.1vw, 12px)' }}
                   >
                     <span style={{ color: 'var(--text-muted)' }}>{k}</span>
                     <span style={{ color: 'var(--text-primary)' }}>{v}</span>
@@ -362,47 +345,57 @@ export function CVClient({
           </aside>
 
           {/* ── MAIN CONTENT ─────────────────────────────────── */}
-          <main className="cv-main space-y-8">
+          <main className="cv-main space-y-9">
 
             {/* Experience */}
             <section>
               <SectionTitle>Experience</SectionTitle>
-              <div className="space-y-6">
+              <div className="space-y-7">
                 {EXPERIENCES.map((e, i) => (
                   <div
                     key={i}
-                    className="relative pl-4"
+                    className="relative pl-5"
                     style={{ borderLeft: '2px solid var(--border)' }}
                   >
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 mb-1">
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 mb-1">
                       <h3
                         className="font-serif"
-                        style={{ fontSize: 'clamp(14px, 1.8vw, 16px)', lineHeight: 1.2 }}
+                        style={{ fontSize: 'clamp(15px, 1.9vw, 20px)', lineHeight: 1.2 }}
                       >
                         {e.role}
                       </h3>
-                      <span className="font-mono text-[10px] shrink-0" style={{ color: 'var(--text-faint)' }}>
+                      <span
+                        className="font-mono shrink-0"
+                        style={{ fontSize: 'clamp(10px, 1vw, 12px)', color: 'var(--text-faint)' }}
+                      >
                         {e.when}
                       </span>
                     </div>
-                    <div className="font-mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: 'var(--accent)' }}>
+                    <div
+                      className="font-mono uppercase tracking-[0.12em] mb-2.5"
+                      style={{ fontSize: 'clamp(10px, 1vw, 12px)', color: 'var(--accent)' }}
+                    >
                       {e.org}
                     </div>
-                    <ul className="space-y-1 mb-2">
+                    <ul className="space-y-1.5 mb-3">
                       {e.bullets.map((b, j) => (
                         <li
                           key={j}
-                          className="flex gap-2 text-[12px] leading-relaxed"
-                          style={{ color: 'var(--text-muted)' }}
+                          className="flex gap-2.5 leading-relaxed"
+                          style={{ fontSize: 'clamp(12px, 1.3vw, 14px)', color: 'var(--text-muted)' }}
                         >
-                          <span className="shrink-0" style={{ color: 'var(--border-strong)' }}>—</span>
+                          <span className="shrink-0 mt-[0.6em]" style={{ width: 12, height: 1, background: 'var(--border-strong)', display: 'inline-block' }} />
                           <span>{b}</span>
                         </li>
                       ))}
                     </ul>
                     <div className="flex flex-wrap gap-1">
                       {e.stack.map((t) => (
-                        <span key={t} className="tag" style={{ fontSize: '10px', padding: '1px 5px' }}>
+                        <span
+                          key={t}
+                          className="tag"
+                          style={{ fontSize: 'clamp(10px, 1vw, 11px)', padding: '1px 6px' }}
+                        >
                           {t}
                         </span>
                       ))}
@@ -415,23 +408,24 @@ export function CVClient({
             {/* Research */}
             <section>
               <SectionTitle>Research &amp; Publications</SectionTitle>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {research.map((r) => (
                   <div
                     key={r.slug}
-                    className="relative pl-4"
+                    className="relative pl-5"
                     style={{ borderLeft: '2px solid var(--border)' }}
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-0.5 mb-0.5">
+                    <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1 mb-1">
                       <p
                         className="font-serif leading-snug flex-1"
-                        style={{ fontSize: 'clamp(12px, 1.5vw, 14px)' }}
+                        style={{ fontSize: 'clamp(12px, 1.5vw, 15px)' }}
                       >
                         {r.title}
                       </p>
                       <span
-                        className="font-mono text-[9px] uppercase tracking-[0.14em] px-1.5 py-0.5 rounded shrink-0"
+                        className="font-mono uppercase tracking-[0.14em] px-2 py-0.5 rounded shrink-0"
                         style={{
+                          fontSize: 'clamp(9px, 0.9vw, 10px)',
                           background: r.status === 'published' ? 'var(--accent)' : 'var(--bg-elev)',
                           color: r.status === 'published' ? 'var(--bg)' : 'var(--text-faint)',
                           border: r.status === 'published' ? 'none' : '1px solid var(--border)',
@@ -441,10 +435,15 @@ export function CVClient({
                       </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
-                      <span className="font-mono text-[10px]" style={{ color: 'var(--accent)' }}>
+                      <span
+                        className="font-mono"
+                        style={{ fontSize: 'clamp(10px, 1vw, 12px)', color: 'var(--accent)' }}
+                      >
                         {r.venueShort} · {r.year}
                       </span>
-                      <span className="text-[11px]" style={{ color: 'var(--text-faint)' }}>
+                      <span
+                        style={{ fontSize: 'clamp(11px, 1.1vw, 12px)', color: 'var(--text-faint)' }}
+                      >
                         {r.authors.join(', ')}
                       </span>
                     </div>
@@ -452,10 +451,10 @@ export function CVClient({
                       <a
                         href={r.link ?? r.arxiv}
                         target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 font-mono text-[10px] mt-0.5 smooth hover:opacity-70"
-                        style={{ color: 'var(--text-muted)' }}
+                        className="inline-flex items-center gap-1 font-mono mt-0.5 smooth hover:opacity-70"
+                        style={{ fontSize: 'clamp(10px, 1vw, 11px)', color: 'var(--text-muted)' }}
                       >
-                        <IconArrowUpRight size={10} /> view paper
+                        <IconArrowUpRight size={11} /> view paper
                       </a>
                     )}
                   </div>
@@ -471,25 +470,32 @@ export function CVClient({
                   <Link
                     key={p.name}
                     href={p.href}
-                    className="block rounded-lg p-3 smooth hover:opacity-80"
+                    className="block rounded-xl p-4 smooth hover:opacity-80"
                     style={{ border: '1px solid var(--border)', background: 'var(--bg-elev)' }}
                     data-hover
                   >
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between mb-1.5">
                       <span
                         className="font-serif"
-                        style={{ fontSize: 'clamp(12px, 1.4vw, 14px)' }}
+                        style={{ fontSize: 'clamp(13px, 1.5vw, 16px)' }}
                       >
                         {p.name}
                       </span>
-                      <IconArrowUpRight size={11} />
+                      <IconArrowUpRight size={13} />
                     </div>
-                    <p className="text-[11px] leading-relaxed mb-2" style={{ color: 'var(--text-muted)' }}>
+                    <p
+                      className="leading-relaxed mb-2.5"
+                      style={{ fontSize: 'clamp(11px, 1.1vw, 13px)', color: 'var(--text-muted)' }}
+                    >
                       {p.desc}
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {p.tags.map((t) => (
-                        <span key={t} className="tag" style={{ fontSize: '10px', padding: '1px 5px' }}>
+                        <span
+                          key={t}
+                          className="tag"
+                          style={{ fontSize: 'clamp(10px, 1vw, 11px)', padding: '1px 6px' }}
+                        >
                           {t}
                         </span>
                       ))}
@@ -497,11 +503,11 @@ export function CVClient({
                   </Link>
                 ))}
               </div>
-              <div className="mt-3">
+              <div className="mt-4">
                 <Link
                   href="/projects"
-                  className="font-mono text-[10px] uppercase tracking-[0.14em] smooth hover:opacity-70"
-                  style={{ color: 'var(--text-muted)' }}
+                  className="font-mono uppercase tracking-[0.14em] smooth hover:opacity-70"
+                  style={{ fontSize: 'clamp(10px, 1vw, 11px)', color: 'var(--text-muted)' }}
                   data-hover
                 >
                   view all 24 projects →
@@ -514,8 +520,8 @@ export function CVClient({
 
         {/* ── Footer note ── */}
         <footer
-          className="no-print mt-10 pt-6 flex flex-wrap items-center justify-between gap-4 font-mono text-[10px]"
-          style={{ borderTop: '1px solid var(--border)', color: 'var(--text-faint)' }}
+          className="no-print mt-12 pt-6 flex flex-wrap items-center justify-between gap-4 font-mono"
+          style={{ borderTop: '1px solid var(--border)', color: 'var(--text-faint)', fontSize: 'clamp(10px, 1vw, 11px)' }}
         >
           <span>Last updated May 2026 · architr.vercel.app/cv</span>
           <Link href="/" style={{ color: 'var(--text-faint)' }} data-hover>← portfolio</Link>
@@ -531,7 +537,7 @@ export function CVClient({
             max-width: 100% !important;
           }
           .cv-body {
-            grid-template-columns: minmax(0,1fr) minmax(0,2.4fr) !important;
+            grid-template-columns: minmax(0,1fr) minmax(0,2.6fr) !important;
           }
           body {
             background: white !important;
@@ -543,17 +549,13 @@ export function CVClient({
           }
         }
 
-        /* Responsive: stack sidebar below main on mobile */
+        /* Responsive: stack on mobile */
         @media (max-width: 640px) {
           .cv-body {
             grid-template-columns: 1fr !important;
           }
-          .cv-sidebar {
-            order: 2;
-          }
-          .cv-main {
-            order: 1;
-          }
+          .cv-sidebar { order: 2; }
+          .cv-main    { order: 1; }
         }
       `}</style>
     </>

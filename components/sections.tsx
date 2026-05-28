@@ -103,7 +103,7 @@ export function Nav() {
             </a>
           ))}
           <Link href="/cv" className="nav-link" data-hover style={{ color: 'var(--text-muted)' }}>
-            CV
+            <span style={{ color: 'var(--text-faint)' }}>06</span>&nbsp;&nbsp;CV
           </Link>
         </nav>
         <button
