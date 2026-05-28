@@ -102,6 +102,9 @@ export function Nav() {
               <span style={{ color: 'var(--text-faint)' }}>0{idx + 1}</span>&nbsp;&nbsp;{label}
             </a>
           ))}
+          <Link href="/cv" className="nav-link" data-hover style={{ color: 'var(--text-muted)' }}>
+            CV
+          </Link>
         </nav>
         <button
           className="smooth flex items-center gap-2 px-3 py-2 rounded-md font-mono text-[11px]"

@@ -28,6 +28,7 @@ Next.js 15 App Router portfolio (React 19). All interactive components are Clien
 | `/blogs/[slug]` | `app/blogs/[slug]/page.tsx` |
 | `/research/[slug]` | `app/research/[slug]/page.tsx` |
 | `/agent-skills` | `app/agent-skills/page.tsx` |
+| `/cv` | `app/cv/page.tsx` |
 
 Every dynamic route follows the same server/client split: the `page.tsx` is an async Server Component that fetches data and generates metadata; it renders a `*Client` component (sibling `client.tsx`) that owns all interactivity.
 
