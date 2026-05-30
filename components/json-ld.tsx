@@ -52,7 +52,7 @@ export function RootJsonLd() {
               'PyTorch',
               'Next.js',
             ],
-            sameAs: [AUTHOR.github, AUTHOR.linkedin, AUTHOR.twitter],
+            sameAs: [AUTHOR.github, AUTHOR.linkedin, AUTHOR.twitter, AUTHOR.scholar],
           },
           {
             '@type': 'WebSite',
@@ -62,6 +62,15 @@ export function RootJsonLd() {
             author: { '@id': PERSON_ID },
             description: AUTHOR.bio,
             inLanguage: 'en-US',
+          },
+          {
+            '@type': 'ProfilePage',
+            '@id': `${SITE_URL}/#profilepage`,
+            name: `${AUTHOR.name} — ${AUTHOR.title}`,
+            url: SITE_URL,
+            description: AUTHOR.bio,
+            mainEntity: { '@id': PERSON_ID },
+            isPartOf: { '@id': SITE_ID },
           },
         ],
       }}
@@ -168,6 +177,33 @@ export function ProjectJsonLd({ p, idx }: { p: Project; idx: number }) {
       data={{
         '@context': 'https://schema.org',
         '@graph': [mainEntity, breadcrumb],
+      }}
+    />
+  );
+}
+
+/** Blog listing page */
+export function BlogListJsonLd() {
+  return (
+    <Script
+      data={{
+        '@context': 'https://schema.org',
+        '@type': 'Blog',
+        '@id': `${SITE_URL}/blogs#blog`,
+        name: `Field Notes — ${AUTHOR.name}`,
+        url: `${SITE_URL}/blogs`,
+        description:
+          'Writing on ML fairness, systems design, explainable AI, and the questions worth asking. By Archit Rathod.',
+        author: { '@id': PERSON_ID },
+        isPartOf: { '@id': SITE_ID },
+        inLanguage: 'en-US',
+        breadcrumb: {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+            { '@type': 'ListItem', position: 2, name: 'Field Notes', item: `${SITE_URL}/blogs` },
+          ],
+        },
       }}
     />
   );

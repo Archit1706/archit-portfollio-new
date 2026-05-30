@@ -6,6 +6,16 @@ import { CVClient } from './client';
 export const metadata: Metadata = {
   title: 'CV — Archit Rathod',
   description: 'Curriculum vitae of Archit Rathod — Software Engineer & ML Fairness Researcher. MS Computer Science at University of Illinois Chicago.',
+  keywords: [
+    'Archit Rathod CV',
+    'Archit Rathod resume',
+    'ML Fairness Researcher CV',
+    'Software Engineer UIC',
+    'University of Illinois Chicago CS',
+    'ML research resume',
+    'AI engineer CV',
+  ],
+  alternates: { canonical: `${SITE_URL}/cv` },
   openGraph: {
     title: 'CV — Archit Rathod',
     description: 'Software Engineer & ML Fairness Researcher · MS CS @ UIC',
@@ -16,9 +26,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
+    site: AUTHOR.handle,
+    creator: AUTHOR.handle,
     title: 'CV — Archit Rathod',
     description: 'Software Engineer & ML Fairness Researcher · MS CS @ UIC',
-    creator: `@${AUTHOR.handle}`,
   },
 };
 

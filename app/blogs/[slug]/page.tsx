@@ -60,19 +60,33 @@ export default async function BlogPostPage({
   const prev = idx < allPosts.length - 1 ? allPosts[idx + 1] : null;
   const next = idx > 0 ? allPosts[idx - 1] : null;
 
+  const postUrl = `${SITE_URL}/blogs/${post.slug}`;
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
       {
         '@type': 'BlogPosting',
-        '@id': `${SITE_URL}/blogs/${post.slug}#post`,
+        '@id': `${postUrl}#post`,
         headline: post.title,
         description: post.excerpt,
-        author: { '@type': 'Person', name: AUTHOR.name, url: SITE_URL },
+        author: { '@type': 'Person', '@id': `${SITE_URL}/#person`, name: AUTHOR.name, url: SITE_URL },
+        publisher: {
+          '@type': 'Person',
+          '@id': `${SITE_URL}/#person`,
+          name: AUTHOR.name,
+          url: SITE_URL,
+          image: { '@type': 'ImageObject', url: `${SITE_URL}/archit.jpg` },
+        },
+        image: { '@type': 'ImageObject', url: DEFAULT_OG.image, width: 1200, height: 630 },
+        mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
         datePublished: `${post.date}T00:00:00Z`,
+        dateModified: `${post.date}T00:00:00Z`,
         keywords: post.tags.join(', '),
-        url: `${SITE_URL}/blogs/${post.slug}`,
+        url: postUrl,
         timeRequired: `PT${post.readingTime}M`,
+        wordCount: post.readingTime * 200,
+        inLanguage: 'en-US',
+        isPartOf: { '@id': `${SITE_URL}/blogs#blog` },
       },
       {
         '@type': 'BreadcrumbList',

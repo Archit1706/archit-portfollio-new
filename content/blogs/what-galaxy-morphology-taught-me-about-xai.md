@@ -1,7 +1,7 @@
 ---
 title: "What Galaxy Morphology Taught Me About the Limits of Explainability"
 slug: what-galaxy-morphology-taught-me-about-xai
-date: 2025-06-08
+date: 2026-05-08
 tags: [XAI, Deep Learning, Research, Computer Vision]
 excerpt: "We had four explainability methods and four CNN architectures. None of them agreed with each other. That disagreement was the finding."
 readingTime: 7

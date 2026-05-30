@@ -1,11 +1,23 @@
 import type { Metadata } from 'next';
 import { getAllPosts, getAllTags } from '@/lib/blog-utils';
 import { SITE_URL, AUTHOR, DEFAULT_OG } from '@/lib/seo';
+import { BlogListJsonLd } from '@/components/json-ld';
 import { BlogsClient } from './client';
 
 export const metadata: Metadata = {
   title: 'Field Notes',
   description: 'Writing on ML fairness, systems design, explainable AI, and the questions worth asking. By Archit Rathod.',
+  keywords: [
+    'Archit Rathod blog',
+    'ML fairness writing',
+    'AI explainability articles',
+    'XAI blog',
+    'machine learning blog',
+    'responsible AI',
+    'systems design',
+    'data engineering',
+    'deep learning tutorials',
+  ],
   alternates: { canonical: `${SITE_URL}/blogs` },
   openGraph: {
     type: 'website',
@@ -27,5 +39,10 @@ export default function BlogsPage() {
   const posts = getAllPosts();
   const tags = getAllTags();
 
-  return <BlogsClient posts={posts} tags={tags} />;
+  return (
+    <>
+      <BlogListJsonLd />
+      <BlogsClient posts={posts} tags={tags} />
+    </>
+  );
 }
