@@ -327,7 +327,7 @@ export function CVClient({
                 {[
                   ['Publications', `${publishedCount} peer-reviewed`],
                   ['Reports', `${research.length - publishedCount} technical`],
-                  ['Projects', '24 shipped'],
+                  ['Projects', '30 shipped'],
                   ['GSoC', '2025 Contributor'],
                   ['Languages', '6 fluent'],
                 ].map(([k, v]) => (
@@ -512,7 +512,7 @@ export function CVClient({
                   style={{ fontSize: 'clamp(10px, 1vw, 11px)', color: 'var(--text-muted)' }}
                   data-hover
                 >
-                  view all 24 projects →
+                  view all 30 projects →
                 </Link>
               </div>
             </section>

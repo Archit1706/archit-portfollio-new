@@ -34,7 +34,7 @@ const TERMINAL_LINES = [
   { cmd: true,  text: 'whoami' },
   { cmd: false, text: 'archit rathod · ms cs · uic · chicago' },
   { cmd: true,  text: 'cat projects.txt | wc -l' },
-  { cmd: false, text: '27 shipped' },
+  { cmd: false, text: '30 shipped' },
   { cmd: true,  text: 'git log --oneline -3' },
   { cmd: false, text: '* galaxy morphology xai' },
   { cmd: false, text: '* greenpipe ci/cd agent' },
@@ -265,7 +265,7 @@ function ProjectCard({ kicker, title, body, tags, stats, icon, href }: { kicker:
 export function Work() {
   return (
     <section id="work" className="relative px-6 md:px-10 max-w-[1400px] mx-auto py-24">
-      <SectionHeader idx="02" kicker="featured work" title={<>Tools that <em className="font-serif" style={{ fontStyle: 'italic' }}>prove</em> the thesis.</>} subtitle="Four projects at the intersection of scalable systems and responsible AI — a VS Code fairness debugger, a galaxy morphology explainability study, an agentic real-estate platform, and a year of published research." />
+      <SectionHeader idx="02" kicker="featured work" title={<>Tools that <em className="font-serif" style={{ fontStyle: 'italic' }}>prove</em> the thesis.</>} subtitle="Four projects at the intersection of scalable systems and responsible AI — a VS Code fairness debugger, a galaxy morphology explainability study, a causal-graph fairness library on PyPI, and a year of published research." />
 
       <div className="grid md:grid-cols-12 gap-8 mb-16">
         <div className="md:col-span-5">
@@ -333,13 +333,13 @@ export function Work() {
 
       <div className="grid md:grid-cols-2 gap-6">
         <ProjectCard
-          kicker="full-stack · ai agents"
-          title="Keya AI"
-          body="Agentic real-estate assistant covering 1,000+ ZIP codes. LangChain + Azure OpenAI, integrated with Zillow, Google Maps, and GreatSchools APIs — with personalized property recommendations and dual chat interfaces."
-          tags={['LangChain', 'Azure OpenAI', 'Next.js', 'FastAPI', 'Zillow API']}
-          stats={[['agent tools', '8'], ['languages', '4'], ['zip codes', '1,000+']]}
-          icon={<IconGlobe size={18} />}
-          href="/project/keya-ai"
+          kicker="open source · pypi"
+          title="relfair"
+          body="Relationship-aware counterfactual fairness testing. Propagates protected-attribute interventions through a causal DAG so flips stay on the data manifold — detecting 3–4× more discrimination than naive flipping on Adult, ACS, and German Credit."
+          tags={['Python', 'Causal DAGs', 'Counterfactuals', 'LL 144', 'PyPI']}
+          stats={[['detection lift', '+27 pp'], ['datasets', '3'], ['tests', '62']]}
+          icon={<IconSparkles size={18} />}
+          href="/project/relfair"
         />
         <ProjectCard
           kicker="research · multi"

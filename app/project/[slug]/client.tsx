@@ -53,6 +53,8 @@ const WIDGET_MAP: Record<string, WC> = {
   galaxyXai:   pw('GalaxyXAIWidget'),
   greenPipe:   pw('GreenPipeWidget'),
   fairLend:    pw('FairLendWidget'),
+  relfair:     pw('RelFairWidget'),
+  lattice:     pw('LatticeWidget'),
   osmMap:      pw('OSMMapWidget'),
   chatAgent:   pw('ChatAgentWidget'),
   cycleGraph:  pw('CycleGraphWidget'),

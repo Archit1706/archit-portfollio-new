@@ -1213,6 +1213,713 @@ export function GalaxyXAIWidget() {
   );
 }
 
+/* =========================================================
+   RELFAIR — relationship-aware counterfactual fairness
+   ========================================================= */
+type RFNode = {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+  protected?: boolean;
+  root?: boolean;
+};
+
+const RF_NODES: RFNode[] = [
+  { id: 'sex',          label: 'sex',          x: 50,  y: 40,  protected: true, root: true },
+  { id: 'age',          label: 'age',          x: 50,  y: 130, root: true },
+  { id: 'relationship', label: 'relationship', x: 180, y: 40 },
+  { id: 'occupation',   label: 'occupation',   x: 180, y: 130 },
+  { id: 'hours',        label: 'hours/wk',     x: 180, y: 200 },
+  { id: 'income',       label: 'income',       x: 310, y: 85 },
+];
+
+const RF_EDGES: [string, string][] = [
+  ['sex', 'relationship'],
+  ['sex', 'occupation'],
+  ['age', 'occupation'],
+  ['age', 'hours'],
+  ['relationship', 'income'],
+  ['occupation', 'income'],
+  ['hours', 'income'],
+];
+
+const RF_DATASETS = {
+  adult:    { label: 'Adult',         naive: 7.0,  rel: 24.3, lift: '+17.2 pp', n: '3,682 rows' },
+  acs:      { label: 'ACS Income CA', naive: 7.5,  rel: 34.5, lift: '+27.0 pp (4.6×)', n: '5,241 rows' },
+  german:   { label: 'German Credit', naive: 4.9,  rel: 13.2, lift: '+8.3 pp', n: '144 rows' },
+} as const;
+type RFDataset = keyof typeof RF_DATASETS;
+
+const RF_SAMPLE_ROW = {
+  sex: 'Male',
+  age: 41,
+  relationship: 'Husband',
+  occupation: 'Exec-managerial',
+  hours: 50,
+  income: '>50K',
+};
+
+export function RelFairWidget() {
+  const [dataset, setDataset] = useState<RFDataset>('adult');
+  const [mode, setMode] = useState<'naive' | 'relaware'>('relaware');
+  const [phase, setPhase] = useState<'idle' | 'flipping' | 'done'>('idle');
+  const [activeNodes, setActiveNodes] = useState<Set<string>>(new Set());
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const reset = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setPhase('idle');
+    setActiveNodes(new Set());
+  };
+
+  const flip = () => {
+    reset();
+    setPhase('flipping');
+    const order = mode === 'naive'
+      ? ['sex']
+      : ['sex', 'relationship', 'occupation', 'income'];
+    const activate = (i: number) => {
+      if (i >= order.length) {
+        setPhase('done');
+        return;
+      }
+      setActiveNodes((prev) => new Set([...prev, order[i]]));
+      timerRef.current = setTimeout(() => activate(i + 1), 550);
+    };
+    timerRef.current = setTimeout(() => activate(0), 250);
+  };
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+  useEffect(() => { reset(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [mode, dataset]);
+
+  const ds = RF_DATASETS[dataset];
+
+  const flipped = phase !== 'idle';
+  const isNaive = mode === 'naive';
+
+  const afterRow = (() => {
+    if (!flipped) return null;
+    if (isNaive) {
+      return { ...RF_SAMPLE_ROW, sex: 'Female' };
+    }
+    return {
+      ...RF_SAMPLE_ROW,
+      sex: 'Female',
+      relationship: activeNodes.has('relationship') ? 'Wife' : RF_SAMPLE_ROW.relationship,
+      occupation: activeNodes.has('occupation') ? 'Adm-clerical' : RF_SAMPLE_ROW.occupation,
+      income: activeNodes.has('income') ? '≤50K' : RF_SAMPLE_ROW.income,
+    };
+  })();
+
+  const constraintViolation = isNaive && phase === 'done';
+
+  return (
+    <div className="glass rounded-2xl overflow-hidden relative" style={{ boxShadow: 'var(--shadow-glass)' }}>
+      {/* Chrome */}
+      <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5">
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ff5f56' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ffbd2e' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#27c93f' }} />
+          </div>
+          <span className="font-mono text-[11px]" style={{ color: 'var(--text-muted)' }}>relfair · counterfactual fairness · v0.1.0</span>
+        </div>
+        <div className="flex items-center gap-2 font-mono text-[10px]" style={{ color: 'var(--text-muted)' }}>
+          <span>dataset · {ds.label}</span>
+          <span style={{ color: 'var(--text-faint)' }}>·</span>
+          <span>{ds.n}</span>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-5 gap-0">
+        {/* Causal DAG */}
+        <div className="md:col-span-3 relative border-b md:border-b-0 md:border-r" style={{ borderColor: 'var(--border)', background: 'var(--bg)' }}>
+          <svg viewBox="0 0 380 250" className="w-full" style={{ maxHeight: 340 }}>
+            <defs>
+              <marker id="rf-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border-strong)" />
+              </marker>
+              <marker id="rf-arrow-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)" />
+              </marker>
+            </defs>
+
+            {/* Edges */}
+            {RF_EDGES.map(([a, b], i) => {
+              const na = RF_NODES.find((n) => n.id === a)!;
+              const nb = RF_NODES.find((n) => n.id === b)!;
+              const isProp = mode === 'relaware' && activeNodes.has(a) && activeNodes.has(b);
+              const isBlocked = mode === 'naive' && a === 'sex' && phase === 'done';
+              return (
+                <g key={i}>
+                  <line
+                    x1={na.x + 36} y1={na.y}
+                    x2={nb.x - 36} y2={nb.y}
+                    stroke={isProp ? 'var(--accent)' : isBlocked ? '#ef4444' : 'var(--border-strong)'}
+                    strokeWidth={isProp ? 1.6 : 0.8}
+                    strokeDasharray={isBlocked ? '3 2' : 'none'}
+                    markerEnd={isProp ? 'url(#rf-arrow-active)' : 'url(#rf-arrow)'}
+                    opacity={isBlocked ? 0.7 : 1}
+                    style={{ transition: 'stroke 0.3s, stroke-width 0.3s' }}
+                  />
+                  {isBlocked && (
+                    <text x={(na.x + nb.x) / 2} y={(na.y + nb.y) / 2 - 4}
+                      fontFamily="JetBrains Mono,monospace" fontSize="7.5" fill="#ef4444" textAnchor="middle">
+                      ✗ off-manifold
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+
+            {/* Nodes */}
+            {RF_NODES.map((n) => {
+              const active = activeNodes.has(n.id);
+              const fill = n.protected ? (active ? '#ef4444' : 'rgba(239,68,68,0.15)') : (active ? 'var(--accent)' : 'var(--bg-elev)');
+              const stroke = n.protected ? '#ef4444' : (active ? 'var(--accent)' : 'var(--border-strong)');
+              const textFill = active ? '#fff' : 'var(--text-primary)';
+              return (
+                <g key={n.id} style={{ transition: 'all 0.4s' }}>
+                  {active && (
+                    <ellipse cx={n.x} cy={n.y} rx="42" ry="20"
+                      fill={n.protected ? 'rgba(239,68,68,0.18)' : 'var(--accent-soft)'}
+                      style={{ animation: 'rf-pulse 1.4s ease-out infinite' }} />
+                  )}
+                  <rect x={n.x - 36} y={n.y - 13} width="72" height="26" rx="13"
+                    fill={fill} stroke={stroke} strokeWidth={active ? 1.6 : 1}
+                    style={{ transition: 'fill 0.4s, stroke 0.4s' }} />
+                  <text x={n.x} y={n.y + 3.5}
+                    fontFamily="JetBrains Mono,monospace" fontSize="9.5"
+                    fill={textFill} textAnchor="middle"
+                    style={{ transition: 'fill 0.3s' }}>
+                    {n.label}
+                  </text>
+                </g>
+              );
+            })}
+
+            <style>{`
+              @keyframes rf-pulse {
+                0%   { transform: scale(0.85); opacity: 0.7; transform-origin: center; }
+                100% { transform: scale(1.25); opacity: 0; transform-origin: center; }
+              }
+            `}</style>
+          </svg>
+
+          {/* Row diff table */}
+          <div className="px-4 pb-4">
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-2" style={{ color: 'var(--text-muted)' }}>
+              sample row · intervention: sex → Female
+            </div>
+            <div className="rounded-md overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+              <div className="grid grid-cols-7 font-mono text-[9px] uppercase tracking-[0.10em] px-2 py-1.5" style={{ background: 'var(--bg-elev)', color: 'var(--text-muted)' }}>
+                <span>row</span>
+                <span>sex</span>
+                <span>age</span>
+                <span>relationship</span>
+                <span>occupation</span>
+                <span>hours</span>
+                <span>income</span>
+              </div>
+              <div className="grid grid-cols-7 font-mono text-[10px] px-2 py-1.5 border-t" style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+                <span>original</span>
+                <span>{RF_SAMPLE_ROW.sex}</span>
+                <span>{RF_SAMPLE_ROW.age}</span>
+                <span>{RF_SAMPLE_ROW.relationship}</span>
+                <span>{RF_SAMPLE_ROW.occupation}</span>
+                <span>{RF_SAMPLE_ROW.hours}</span>
+                <span>{RF_SAMPLE_ROW.income}</span>
+              </div>
+              <div className="grid grid-cols-7 font-mono text-[10px] px-2 py-1.5 border-t items-center"
+                style={{ borderColor: 'var(--border)', color: flipped ? 'var(--text-primary)' : 'var(--text-faint)', background: constraintViolation ? 'rgba(239,68,68,0.06)' : 'transparent' }}>
+                <span style={{ color: flipped ? 'var(--accent)' : 'var(--text-faint)' }}>{isNaive ? 'naive' : 'rel-aware'}</span>
+                <span style={{ color: flipped ? '#ef4444' : 'inherit' }}>{afterRow ? afterRow.sex : '—'}</span>
+                <span>{afterRow ? afterRow.age : '—'}</span>
+                <span style={{ color: afterRow && afterRow.relationship !== RF_SAMPLE_ROW.relationship ? 'var(--accent)' : (constraintViolation ? '#ef4444' : 'inherit') }}>
+                  {afterRow ? afterRow.relationship : '—'}
+                </span>
+                <span style={{ color: afterRow && afterRow.occupation !== RF_SAMPLE_ROW.occupation ? 'var(--accent)' : 'inherit' }}>
+                  {afterRow ? afterRow.occupation : '—'}
+                </span>
+                <span>{afterRow ? afterRow.hours : '—'}</span>
+                <span style={{ color: afterRow && afterRow.income !== RF_SAMPLE_ROW.income ? 'var(--accent)' : 'inherit' }}>
+                  {afterRow ? afterRow.income : '—'}
+                </span>
+              </div>
+            </div>
+            {constraintViolation && (
+              <div className="font-mono text-[10px] mt-2 leading-relaxed" style={{ color: '#ef4444' }}>
+                ✗ constraint violation · sex=Female + relationship=Husband never occurs in training data → prediction is off-manifold and silently absorbs bias.
+              </div>
+            )}
+            {!isNaive && phase === 'done' && (
+              <div className="font-mono text-[10px] mt-2 leading-relaxed" style={{ color: '#4ade80' }}>
+                ✓ propagated through DAG · row stays on the data manifold · the model now sees a coherent counterfactual.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Controls + metrics */}
+        <div className="md:col-span-2 p-5 flex flex-col gap-4">
+          {/* Dataset */}
+          <div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-1.5" style={{ color: 'var(--text-muted)' }}>Dataset</div>
+            <div className="grid grid-cols-3 gap-1">
+              {(Object.entries(RF_DATASETS) as [RFDataset, typeof RF_DATASETS[RFDataset]][]).map(([k, v]) => (
+                <button key={k} onClick={() => setDataset(k)}
+                  className="font-mono text-[10px] py-1.5 rounded-md smooth"
+                  style={{
+                    background: dataset === k ? 'var(--accent-soft)' : 'var(--bg-elev)',
+                    color: dataset === k ? 'var(--accent)' : 'var(--text-muted)',
+                    border: `1px solid ${dataset === k ? 'var(--accent)' : 'var(--border)'}`,
+                  }}
+                  data-hover>
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Mode */}
+          <div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-1.5" style={{ color: 'var(--text-muted)' }}>Intervention Mode</div>
+            <div className="grid grid-cols-2 gap-1">
+              {(['naive', 'relaware'] as const).map((m) => (
+                <button key={m} onClick={() => setMode(m)}
+                  className="font-mono text-[10px] py-1.5 rounded-md smooth uppercase tracking-[0.10em]"
+                  style={{
+                    background: mode === m ? 'var(--accent)' : 'var(--bg-elev)',
+                    color: mode === m ? 'var(--bg)' : 'var(--text-muted)',
+                    border: `1px solid ${mode === m ? 'var(--accent)' : 'var(--border-strong)'}`,
+                  }}
+                  data-hover>
+                  {m === 'naive' ? 'Naive Flip' : 'Rel-Aware'}
+                </button>
+              ))}
+            </div>
+            <p className="font-mono text-[9px] leading-relaxed mt-2" style={{ color: 'var(--text-faint)' }}>
+              {mode === 'naive'
+                ? 'Flips only the protected attribute. Downstream variables stay → row lands off the data manifold.'
+                : 'Propagates the flip through the causal DAG. Downstream values update to stay coherent.'}
+            </p>
+          </div>
+
+          {/* Run */}
+          <button
+            onClick={phase === 'flipping' ? undefined : flip}
+            disabled={phase === 'flipping'}
+            className="w-full py-2.5 rounded-md font-mono text-[11px] uppercase tracking-[0.14em] smooth"
+            style={{
+              background: phase === 'flipping' ? 'var(--bg-elev)' : 'var(--accent)',
+              color: phase === 'flipping' ? 'var(--text-muted)' : 'var(--bg)',
+              border: `1px solid ${phase === 'flipping' ? 'var(--border-strong)' : 'var(--accent)'}`,
+            }}
+            data-hover>
+            {phase === 'flipping' ? 'propagating…' : phase === 'done' ? '↺ re-run intervention' : '▶ flip sex → female'}
+          </button>
+
+          {/* Stats */}
+          <div className="rounded-lg p-3" style={{ background: 'var(--bg-elev)', border: '1px solid var(--border)' }}>
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-2.5" style={{ color: 'var(--text-muted)' }}>
+              Flip rate · {ds.label}
+            </div>
+            {[
+              { label: 'Naive', value: ds.naive, color: '#ef4444' },
+              { label: 'Rel-aware', value: ds.rel, color: '#4ade80' },
+            ].map(({ label, value, color }) => (
+              <div key={label} className="mb-2 last:mb-0">
+                <div className="flex justify-between font-mono text-[10px] mb-1">
+                  <span style={{ color: 'var(--text-muted)' }}>{label}</span>
+                  <span style={{ color }}>{value.toFixed(1)}%</span>
+                </div>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg)' }}>
+                  <div className="h-full rounded-full" style={{
+                    width: `${(value / 40) * 100}%`,
+                    background: color,
+                    transition: 'width 0.9s cubic-bezier(0.23,1,0.32,1)',
+                  }} />
+                </div>
+              </div>
+            ))}
+            <div className="flex justify-between font-mono text-[10px] pt-2 mt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Detection lift</span>
+              <span style={{ color: 'var(--accent)' }}>{ds.lift}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   LATTICE — venture intelligence graph + AI brief
+   ========================================================= */
+type LTNode = {
+  id: string;
+  label: string;
+  kind: 'founder' | 'company' | 'investor' | 'lp';
+  x: number;
+  y: number;
+};
+
+const LT_NODES: LTNode[] = [
+  { id: 'sarah',     label: 'Sarah Chen',     kind: 'founder', x: 70,  y: 130 },
+  { id: 'inferon',   label: 'Inferon AI',     kind: 'company', x: 150, y: 90 },
+  { id: 'helix',     label: 'Helix Bio',      kind: 'company', x: 150, y: 175 },
+  { id: 'a16z',      label: 'a16z',           kind: 'investor', x: 250, y: 50 },
+  { id: 'sequoia',   label: 'Sequoia',        kind: 'investor', x: 250, y: 130 },
+  { id: 'lux',       label: 'Lux Capital',    kind: 'investor', x: 250, y: 210 },
+  { id: 'marcus',    label: 'Marcus Liu',     kind: 'founder', x: 150, y: 30 },
+  { id: 'ada',       label: 'Ada Park',       kind: 'founder', x: 70,  y: 60 },
+  { id: 'norges',    label: 'Norges Bank',    kind: 'lp',      x: 340, y: 90 },
+  { id: 'yale',      label: 'Yale Endow.',    kind: 'lp',      x: 340, y: 175 },
+];
+
+const LT_EDGES: { a: string; b: string; w: number; kind: string }[] = [
+  { a: 'sarah',    b: 'inferon', w: 0.95, kind: 'founded' },
+  { a: 'ada',      b: 'inferon', w: 0.85, kind: 'co-founded' },
+  { a: 'marcus',   b: 'helix',   w: 0.92, kind: 'founded' },
+  { a: 'a16z',     b: 'inferon', w: 0.88, kind: 'led seed' },
+  { a: 'sequoia',  b: 'inferon', w: 0.72, kind: 'series A' },
+  { a: 'sequoia',  b: 'helix',   w: 0.81, kind: 'led seed' },
+  { a: 'lux',      b: 'helix',   w: 0.65, kind: 'series A' },
+  { a: 'a16z',     b: 'marcus',  w: 0.55, kind: 'advisor' },
+  { a: 'norges',   b: 'a16z',    w: 0.70, kind: 'LP' },
+  { a: 'norges',   b: 'sequoia', w: 0.78, kind: 'LP' },
+  { a: 'yale',     b: 'sequoia', w: 0.74, kind: 'LP' },
+  { a: 'yale',     b: 'lux',     w: 0.68, kind: 'LP' },
+  { a: 'sarah',    b: 'marcus',  w: 0.42, kind: 'stanford' },
+];
+
+const LT_COLORS = {
+  founder:  '#a78bfa',
+  company:  '#60a5fa',
+  investor: '#fbbf24',
+  lp:       '#34d399',
+} as const;
+
+const LT_BRIEF_LINES: { delay: number; text: string; kind: 'header' | 'body' | 'highlight' | 'q' }[] = [
+  { delay: 0,    text: '## Meeting Brief — Sarah Chen × Inferon AI',                              kind: 'header' },
+  { delay: 380,  text: '',                                                                         kind: 'body' },
+  { delay: 420,  text: 'Background',                                                               kind: 'header' },
+  { delay: 700,  text: 'Founder/CEO Inferon AI · Stanford ML PhD ·',                              kind: 'body' },
+  { delay: 950,  text: 'prior: research scientist at DeepMind (2021–2024)',                       kind: 'body' },
+  { delay: 1250, text: '',                                                                         kind: 'body' },
+  { delay: 1320, text: 'Warm intro paths (2 found)',                                              kind: 'header' },
+  { delay: 1620, text: '→ via Marcus Liu (Stanford ML cohort · advisor a16z)',                    kind: 'highlight' },
+  { delay: 1900, text: '→ via a16z portfolio overlap (you co-invested seed)',                     kind: 'highlight' },
+  { delay: 2200, text: '',                                                                         kind: 'body' },
+  { delay: 2280, text: 'Portfolio overlap with our thesis',                                       kind: 'header' },
+  { delay: 2580, text: '3 portfolio companies in inference infra · last 18mo',                    kind: 'body' },
+  { delay: 2860, text: '',                                                                         kind: 'body' },
+  { delay: 2920, text: 'Diligence questions',                                                     kind: 'header' },
+  { delay: 3200, text: 'Q1. moat vs Modal/Replicate on cold-start latency?',                      kind: 'q' },
+  { delay: 3520, text: 'Q2. unit economics at >100M token/day throughput?',                       kind: 'q' },
+  { delay: 3820, text: 'Q3. retention risk if AWS Bedrock undercuts pricing?',                    kind: 'q' },
+  { delay: 4180, text: '',                                                                         kind: 'body' },
+  { delay: 4240, text: '✓ brief generated · 1,284 tokens · 1.7s',                                 kind: 'highlight' },
+];
+
+export function LatticeWidget() {
+  const [selected, setSelected] = useState<string | null>('sarah');
+  const [target, setTarget] = useState<string | null>(null);
+  const [pathMode, setPathMode] = useState(false);
+  const [briefIdx, setBriefIdx] = useState(0);
+  const [briefRunning, setBriefRunning] = useState(false);
+  const briefTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const generateBrief = () => {
+    if (briefTimer.current) clearTimeout(briefTimer.current);
+    setBriefIdx(0);
+    setBriefRunning(true);
+  };
+
+  useEffect(() => {
+    if (!briefRunning) return;
+    if (briefIdx >= LT_BRIEF_LINES.length) {
+      setBriefRunning(false);
+      return;
+    }
+    const delay = briefIdx === 0 ? 100 : LT_BRIEF_LINES[briefIdx].delay - LT_BRIEF_LINES[briefIdx - 1].delay;
+    briefTimer.current = setTimeout(() => setBriefIdx((n) => n + 1), delay);
+    return () => { if (briefTimer.current) clearTimeout(briefTimer.current); };
+  }, [briefIdx, briefRunning]);
+
+  useEffect(() => () => { if (briefTimer.current) clearTimeout(briefTimer.current); }, []);
+
+  // Compute BFS shortest path
+  const shortestPath = useMemo<string[]>(() => {
+    if (!pathMode || !selected || !target || selected === target) return [];
+    const adj: Record<string, string[]> = {};
+    LT_EDGES.forEach(({ a, b }) => {
+      (adj[a] ||= []).push(b);
+      (adj[b] ||= []).push(a);
+    });
+    const q: string[][] = [[selected]];
+    const seen = new Set([selected]);
+    while (q.length) {
+      const path = q.shift()!;
+      const last = path[path.length - 1];
+      if (last === target) return path;
+      for (const n of adj[last] || []) {
+        if (!seen.has(n)) {
+          seen.add(n);
+          q.push([...path, n]);
+        }
+      }
+    }
+    return [];
+  }, [pathMode, selected, target]);
+
+  const pathSet = new Set(shortestPath);
+  const pathEdges = new Set<string>();
+  for (let i = 0; i < shortestPath.length - 1; i++) {
+    pathEdges.add([shortestPath[i], shortestPath[i + 1]].sort().join('|'));
+  }
+
+  const handleNodeClick = (id: string) => {
+    if (pathMode) {
+      if (!selected) { setSelected(id); return; }
+      if (selected === id) { setTarget(null); return; }
+      setTarget(id);
+    } else {
+      setSelected(id);
+      setTarget(null);
+    }
+  };
+
+  const selectedNode = LT_NODES.find((n) => n.id === selected);
+  const neighbors = LT_EDGES
+    .filter((e) => e.a === selected || e.b === selected)
+    .map((e) => ({ id: e.a === selected ? e.b : e.a, kind: e.kind, w: e.w }));
+
+  const BRIEF_COLOR: Record<string, string> = {
+    header: 'var(--accent)',
+    body: 'var(--text-primary)',
+    highlight: '#4ade80',
+    q: 'var(--text-muted)',
+  };
+
+  return (
+    <div className="glass rounded-2xl overflow-hidden relative" style={{ boxShadow: 'var(--shadow-glass)' }}>
+      {/* Chrome */}
+      <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5">
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ff5f56' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ffbd2e' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#27c93f' }} />
+          </div>
+          <span className="font-mono text-[11px]" style={{ color: 'var(--text-muted)' }}>lattice · venture intelligence · neo4j</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button onClick={() => { setPathMode(false); setTarget(null); }}
+            className="font-mono text-[10px] px-2.5 py-1 rounded smooth uppercase tracking-[0.10em]"
+            style={{
+              background: !pathMode ? 'var(--accent-soft)' : 'transparent',
+              color: !pathMode ? 'var(--accent)' : 'var(--text-muted)',
+              border: `1px solid ${!pathMode ? 'var(--accent)' : 'var(--border)'}`,
+            }} data-hover>
+            explore
+          </button>
+          <button onClick={() => { setPathMode(true); setTarget(null); }}
+            className="font-mono text-[10px] px-2.5 py-1 rounded smooth uppercase tracking-[0.10em]"
+            style={{
+              background: pathMode ? 'var(--accent-soft)' : 'transparent',
+              color: pathMode ? 'var(--accent)' : 'var(--text-muted)',
+              border: `1px solid ${pathMode ? 'var(--accent)' : 'var(--border)'}`,
+            }} data-hover>
+            warm intro
+          </button>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-5 gap-0">
+        {/* Graph */}
+        <div className="md:col-span-3 relative border-b md:border-b-0 md:border-r" style={{ borderColor: 'var(--border)', background: 'var(--bg)' }}>
+          <svg viewBox="0 0 400 260" className="w-full" style={{ maxHeight: 360 }}>
+            <defs>
+              <radialGradient id="lt-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+
+            {/* Edges */}
+            {LT_EDGES.map((e, i) => {
+              const a = LT_NODES.find((n) => n.id === e.a)!;
+              const b = LT_NODES.find((n) => n.id === e.b)!;
+              const key = [e.a, e.b].sort().join('|');
+              const onPath = pathEdges.has(key);
+              const adjacent = !pathMode && (e.a === selected || e.b === selected);
+              return (
+                <line key={i}
+                  x1={a.x} y1={a.y}
+                  x2={b.x} y2={b.y}
+                  stroke={onPath ? 'var(--accent)' : adjacent ? 'var(--accent)' : 'var(--border-strong)'}
+                  strokeWidth={onPath ? 2.2 : adjacent ? 1.4 : e.w * 0.8}
+                  opacity={onPath ? 1 : adjacent ? 0.9 : pathMode ? 0.25 : 0.45}
+                  strokeDasharray={onPath ? '0' : 'none'}
+                  style={{ transition: 'all 0.4s' }} />
+              );
+            })}
+
+            {/* Animated path pulse */}
+            {pathMode && shortestPath.length > 1 && (
+              <g>
+                {shortestPath.slice(0, -1).map((id, i) => {
+                  const a = LT_NODES.find((n) => n.id === id)!;
+                  const b = LT_NODES.find((n) => n.id === shortestPath[i + 1])!;
+                  return (
+                    <circle key={i} r="3" fill="var(--accent)">
+                      <animateMotion dur="1.6s" repeatCount="indefinite"
+                        path={`M ${a.x} ${a.y} L ${b.x} ${b.y}`} />
+                    </circle>
+                  );
+                })}
+              </g>
+            )}
+
+            {/* Nodes */}
+            {LT_NODES.map((n) => {
+              const isSel = n.id === selected;
+              const isTarget = n.id === target;
+              const onPath = pathSet.has(n.id);
+              const dim = pathMode && !onPath;
+              const color = LT_COLORS[n.kind];
+              const r = isSel || isTarget ? 9 : 7;
+              return (
+                <g key={n.id} style={{ cursor: 'pointer', opacity: dim ? 0.35 : 1, transition: 'opacity 0.4s' }}
+                  onClick={() => handleNodeClick(n.id)}>
+                  {(isSel || isTarget) && <circle cx={n.x} cy={n.y} r="22" fill="url(#lt-glow)" />}
+                  <circle cx={n.x} cy={n.y} r={r}
+                    fill={color}
+                    stroke={isSel || isTarget ? 'var(--accent)' : 'rgba(0,0,0,0.4)'}
+                    strokeWidth={isSel || isTarget ? 2 : 0.8}
+                    style={{ transition: 'all 0.3s' }} />
+                  <text x={n.x} y={n.y + r + 9}
+                    fontFamily="JetBrains Mono,monospace" fontSize="8"
+                    fill={isSel || isTarget ? 'var(--accent)' : 'var(--text-primary)'}
+                    textAnchor="middle"
+                    style={{ transition: 'fill 0.3s' }}>
+                    {n.label}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Legend */}
+          <div className="absolute bottom-2 left-3 flex items-center gap-3 font-mono text-[8.5px]" style={{ color: 'var(--text-muted)' }}>
+            {(Object.entries(LT_COLORS) as [keyof typeof LT_COLORS, string][]).map(([k, c]) => (
+              <span key={k} className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
+                {k}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="md:col-span-2 flex flex-col" style={{ minHeight: 360 }}>
+          {/* Mode info */}
+          {pathMode ? (
+            <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
+              <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-2" style={{ color: 'var(--text-muted)' }}>warm intro · shortest path</div>
+              <div className="font-mono text-[11px] space-y-1">
+                <div><span style={{ color: 'var(--text-muted)' }}>from</span> <span style={{ color: 'var(--accent)' }}>{selectedNode?.label || '—'}</span></div>
+                <div><span style={{ color: 'var(--text-muted)' }}>to</span>   <span style={{ color: 'var(--accent)' }}>{target ? LT_NODES.find((n) => n.id === target)?.label : 'click target →'}</span></div>
+                {shortestPath.length > 0 && (
+                  <div className="pt-2 mt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+                    <div className="text-[9px] uppercase tracking-[0.14em] mb-1" style={{ color: 'var(--text-muted)' }}>path · {shortestPath.length - 1} hop{shortestPath.length === 2 ? '' : 's'}</div>
+                    <div className="text-[10px] leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                      {shortestPath.map((id, i) => (
+                        <span key={id}>
+                          {LT_NODES.find((n) => n.id === id)?.label}
+                          {i < shortestPath.length - 1 && <span style={{ color: 'var(--accent)' }}> → </span>}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
+              <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-2" style={{ color: 'var(--text-muted)' }}>entity</div>
+              <div className="flex items-baseline gap-2">
+                <span className="w-2 h-2 rounded-full inline-block" style={{ background: selectedNode ? LT_COLORS[selectedNode.kind] : 'var(--text-faint)' }} />
+                <span className="font-serif text-xl">{selectedNode?.label || '—'}</span>
+              </div>
+              <div className="font-mono text-[10px] mt-1" style={{ color: 'var(--text-muted)' }}>
+                {selectedNode?.kind} · {neighbors.length} connection{neighbors.length === 1 ? '' : 's'}
+              </div>
+              <div className="mt-3 space-y-1 max-h-[110px] overflow-y-auto">
+                {neighbors.map((n) => {
+                  const node = LT_NODES.find((x) => x.id === n.id)!;
+                  return (
+                    <button key={n.id} onClick={() => setSelected(n.id)}
+                      className="w-full flex items-center justify-between font-mono text-[10px] px-2 py-1 rounded smooth"
+                      style={{ background: 'var(--bg-elev)', border: '1px solid var(--border)' }}
+                      data-hover>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: LT_COLORS[node.kind] }} />
+                        <span style={{ color: 'var(--text-primary)' }}>{node.label}</span>
+                      </span>
+                      <span style={{ color: 'var(--text-muted)' }}>{n.kind} · {n.w.toFixed(2)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* AI Brief */}
+          <div className="p-4 flex-1 flex flex-col">
+            <div className="flex items-center justify-between mb-2">
+              <div className="font-mono text-[9px] uppercase tracking-[0.18em]" style={{ color: 'var(--text-muted)' }}>ai meeting brief</div>
+              <button onClick={generateBrief}
+                disabled={briefRunning}
+                className="font-mono text-[9px] px-2 py-1 rounded smooth uppercase tracking-[0.10em]"
+                style={{
+                  background: briefRunning ? 'var(--bg-elev)' : 'var(--accent)',
+                  color: briefRunning ? 'var(--text-muted)' : 'var(--bg)',
+                  border: `1px solid ${briefRunning ? 'var(--border-strong)' : 'var(--accent)'}`,
+                }} data-hover>
+                {briefRunning ? 'generating…' : briefIdx === 0 ? '▶ generate' : '↺ re-gen'}
+              </button>
+            </div>
+            <div className="font-mono text-[10px] leading-[1.6] flex-1 overflow-y-auto" style={{ maxHeight: 200 }}>
+              {briefIdx === 0 && !briefRunning && (
+                <span style={{ color: 'var(--text-faint)' }}>
+                  Click <span style={{ color: 'var(--accent)' }}>generate</span> to stream an AI brief for the selected founder — background, warm intros, portfolio overlap, diligence questions.
+                </span>
+              )}
+              {LT_BRIEF_LINES.slice(0, briefIdx).map((l, i) => (
+                <div key={i} style={{
+                  color: BRIEF_COLOR[l.kind],
+                  fontWeight: l.kind === 'header' ? 600 : 400,
+                  paddingLeft: l.kind === 'q' || l.kind === 'highlight' ? 8 : 0,
+                  minHeight: l.text === '' ? '0.6em' : undefined,
+                }}>
+                  {l.text}
+                </div>
+              ))}
+              {briefRunning && briefIdx < LT_BRIEF_LINES.length && (
+                <span className="inline-block w-1.5 h-3 align-middle ml-0.5" style={{ background: 'var(--accent)', animation: 'blink 1s steps(2) infinite' }} />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function TerminalFallbackWidget({ project }: { project: Project }) {
   const lines = [
     `$ git clone ${project.github || 'https://github.com/Archit1706/' + project.slug}`,
