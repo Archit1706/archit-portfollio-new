@@ -55,6 +55,7 @@ const WIDGET_MAP: Record<string, WC> = {
   fairLend:    pw('FairLendWidget'),
   relfair:     pw('RelFairWidget'),
   lattice:     pw('LatticeWidget'),
+  freightToolkit: pw('FreightToolkitWidget'),
   osmMap:      pw('OSMMapWidget'),
   chatAgent:   pw('ChatAgentWidget'),
   cycleGraph:  pw('CycleGraphWidget'),

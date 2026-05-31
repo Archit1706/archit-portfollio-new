@@ -1920,6 +1920,449 @@ export function LatticeWidget() {
   );
 }
 
+/* =========================================================
+   FREIGHT TOOLKIT — CMAP regional freight dashboard
+   ========================================================= */
+type FTLayer = 'traffic' | 'landuse' | 'crash';
+
+type FTMuni = {
+  id: string;
+  name: string;
+  county: string;
+  path: string;        // SVG path
+  cx: number; cy: number;
+  aadt: number;        // avg AADT k
+  hcv: number;         // % heavy commercial
+  pop: number;         // thousands
+  industrialPct: number;
+  commercialPct: number;
+  residentialPct: number;
+  tcuPct: number;
+  crashes: number;
+  noise: number;       // dB
+  co2: number;         // mt/yr
+};
+
+const FT_MUNIS: FTMuni[] = [
+  {
+    id: 'chicago', name: 'Chicago', county: 'Cook',
+    path: 'M 175 90 L 250 80 L 270 130 L 260 195 L 195 210 L 165 175 L 160 130 Z',
+    cx: 210, cy: 145,
+    aadt: 142, hcv: 11.4, pop: 2746,
+    industrialPct: 14, commercialPct: 22, residentialPct: 48, tcuPct: 9,
+    crashes: 8421, noise: 71, co2: 1280,
+  },
+  {
+    id: 'naperville', name: 'Naperville', county: 'DuPage',
+    path: 'M 85 145 L 145 135 L 160 175 L 130 200 L 90 195 L 75 170 Z',
+    cx: 115, cy: 170,
+    aadt: 38, hcv: 6.2, pop: 149,
+    industrialPct: 8, commercialPct: 18, residentialPct: 64, tcuPct: 4,
+    crashes: 612, noise: 58, co2: 184,
+  },
+  {
+    id: 'schaumburg', name: 'Schaumburg', county: 'Cook',
+    path: 'M 95 65 L 155 60 L 170 95 L 140 120 L 95 115 L 80 95 Z',
+    cx: 122, cy: 90,
+    aadt: 52, hcv: 8.1, pop: 78,
+    industrialPct: 16, commercialPct: 28, residentialPct: 42, tcuPct: 7,
+    crashes: 481, noise: 62, co2: 215,
+  },
+  {
+    id: 'joliet', name: 'Joliet', county: 'Will',
+    path: 'M 105 215 L 165 215 L 175 245 L 145 260 L 105 255 L 90 235 Z',
+    cx: 130, cy: 235,
+    aadt: 44, hcv: 18.7, pop: 150,
+    industrialPct: 26, commercialPct: 14, residentialPct: 38, tcuPct: 14,
+    crashes: 728, noise: 67, co2: 392,
+  },
+  {
+    id: 'evanston', name: 'Evanston', county: 'Cook',
+    path: 'M 215 50 L 260 55 L 265 80 L 235 90 L 210 80 Z',
+    cx: 235, cy: 70,
+    aadt: 28, hcv: 5.4, pop: 78,
+    industrialPct: 5, commercialPct: 14, residentialPct: 71, tcuPct: 3,
+    crashes: 256, noise: 56, co2: 92,
+  },
+  {
+    id: 'cicero', name: 'Cicero', county: 'Cook',
+    path: 'M 145 175 L 175 170 L 178 200 L 158 215 L 140 205 Z',
+    cx: 158, cy: 190,
+    aadt: 36, hcv: 9.8, pop: 81,
+    industrialPct: 18, commercialPct: 16, residentialPct: 52, tcuPct: 8,
+    crashes: 384, noise: 64, co2: 168,
+  },
+];
+
+// Truck route polylines that thread through the region
+const FT_TRUCK_ROUTES = [
+  'M 30 100 L 95 95 L 165 90 L 240 95 L 280 110',     // I-90 NW
+  'M 30 175 L 80 170 L 145 175 L 215 170 L 280 165',  // I-290 / I-294
+  'M 60 260 L 130 235 L 200 215 L 250 200 L 295 175', // I-55
+  'M 215 60 L 220 130 L 215 200 L 220 260',           // I-94 / Lake Shore
+];
+
+// Land-use parcel templates (relative offsets to muni center, color category)
+const FT_PARCELS = [
+  // x_off, y_off, w, h, category
+  [-22, -16, 14, 10, 'I'], [-6, -18, 12, 9, 'C'], [8, -14, 11, 10, 'R'],
+  [-26, 0, 12, 9, 'C'],   [-12, -2, 10, 8, 'R'], [2, 0, 13, 10, 'I'],
+  [16, -2, 10, 9, 'TCU'], [-20, 12, 12, 10, 'R'], [-6, 14, 11, 9, 'R'],
+  [6, 12, 12, 10, 'C'],   [18, 14, 10, 8, 'I'],
+];
+
+const FT_PARCEL_COLOR: Record<string, string> = {
+  I:   '#ef4444',  // industrial — red
+  C:   '#60a5fa',  // commercial — blue
+  R:   '#a3e635',  // residential — green
+  TCU: '#a78bfa',  // transport/comm/utilities — purple
+};
+
+const FT_LAYER_INFO: Record<FTLayer, { label: string; sub: string }> = {
+  traffic: { label: 'Truck Traffic',       sub: 'AADT · HCV share · routes · NHFN' },
+  landuse: { label: 'Land Use',            sub: 'CMAP 2020 LUI · server-clipped parcels' },
+  crash:   { label: 'Crashes & Emissions', sub: 'IDOT 2024 · noise · EMME CO₂/NOₓ/PM2.5' },
+};
+
+export function FreightToolkitWidget() {
+  const [selectedId, setSelectedId] = useState<string>('chicago');
+  const [layer, setLayer] = useState<FTLayer>('traffic');
+  const [compareId, setCompareId] = useState<string | null>(null);
+  const [tick, setTick] = useState(0);
+
+  // Subtle animation for crash density pulses
+  useEffect(() => {
+    if (layer !== 'crash') return;
+    const id = setInterval(() => setTick((t) => t + 1), 90);
+    return () => clearInterval(id);
+  }, [layer]);
+
+  const muni = FT_MUNIS.find((m) => m.id === selectedId)!;
+  const compare = compareId ? FT_MUNIS.find((m) => m.id === compareId) : null;
+
+  // Deterministic crash dots inside the selected muni's path bounding box
+  const crashDots = useMemo(() => {
+    const dots: { x: number; y: number; sev: number; phase: number }[] = [];
+    let seed = muni.id.charCodeAt(0) * 31 + muni.id.length * 7;
+    const rand = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+    const count = Math.min(60, Math.floor(muni.crashes / 12));
+    for (let i = 0; i < count; i++) {
+      dots.push({
+        x: muni.cx + (rand() - 0.5) * 70,
+        y: muni.cy + (rand() - 0.5) * 60,
+        sev: 1 + rand() * 3,
+        phase: rand() * Math.PI * 2,
+      });
+    }
+    return dots;
+  }, [muni]);
+
+  const emissionsScale = (val: number) => Math.min(1, val / 1400);
+
+  return (
+    <div className="glass rounded-2xl overflow-hidden relative" style={{ boxShadow: 'var(--shadow-glass)' }}>
+      {/* Chrome */}
+      <div className="flex items-center justify-between px-5 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1.5">
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ff5f56' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#ffbd2e' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#27c93f' }} />
+          </div>
+          <span className="font-mono text-[11px]" style={{ color: 'var(--text-muted)' }}>freight-toolkit · cmap · utc-uic</span>
+        </div>
+        <div className="font-mono text-[10px]" style={{ color: 'var(--text-faint)' }}>
+          7-county region · {FT_MUNIS.length} of 285+ shown
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-5 gap-0">
+        {/* Map */}
+        <div className="md:col-span-3 relative border-b md:border-b-0 md:border-r" style={{ borderColor: 'var(--border)', background: '#0b1220' }}>
+          <svg viewBox="0 0 320 280" className="w-full" style={{ maxHeight: 380 }}>
+            <defs>
+              <linearGradient id="ft-lake" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="rgba(59,130,246,0.35)" />
+                <stop offset="100%" stopColor="rgba(29,78,216,0.55)" />
+              </linearGradient>
+              <radialGradient id="ft-crash-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="rgba(239,68,68,0.65)" />
+                <stop offset="100%" stopColor="rgba(239,68,68,0)" />
+              </radialGradient>
+              <filter id="ft-shadow"><feDropShadow dx="0" dy="1" stdDeviation="0.8" floodOpacity="0.4" /></filter>
+            </defs>
+
+            {/* Background grid */}
+            {Array.from({ length: 17 }).map((_, i) => (
+              <line key={'gv' + i} x1={i * 20} y1="0" x2={i * 20} y2="280" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
+            ))}
+            {Array.from({ length: 15 }).map((_, i) => (
+              <line key={'gh' + i} x1="0" y1={i * 20} x2="320" y2={i * 20} stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
+            ))}
+
+            {/* Lake Michigan */}
+            <path d="M 280 0 L 320 0 L 320 280 L 285 280 Q 270 200, 285 120 Q 295 60, 280 0 Z" fill="url(#ft-lake)" />
+            <text x="298" y="150" fontFamily="Fraunces,serif" fontSize="9"
+              fill="rgba(147,197,253,0.7)" fontStyle="italic" textAnchor="middle"
+              transform="rotate(90, 298, 150)">
+              Lake Michigan
+            </text>
+
+            {/* County background labels */}
+            <text x="40" y="30" fontFamily="JetBrains Mono,monospace" fontSize="7" fill="rgba(255,255,255,0.18)" letterSpacing="1.5">DUPAGE</text>
+            <text x="180" y="30" fontFamily="JetBrains Mono,monospace" fontSize="7" fill="rgba(255,255,255,0.18)" letterSpacing="1.5">COOK</text>
+            <text x="40" y="270" fontFamily="JetBrains Mono,monospace" fontSize="7" fill="rgba(255,255,255,0.18)" letterSpacing="1.5">WILL</text>
+
+            {/* Truck routes (visible on traffic layer) */}
+            {layer === 'traffic' && FT_TRUCK_ROUTES.map((d, i) => (
+              <g key={i}>
+                <path d={d} stroke="rgba(251,191,36,0.85)" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+                <path d={d} stroke="rgba(251,191,36,0.25)" strokeWidth="4" fill="none" strokeLinecap="round" />
+              </g>
+            ))}
+
+            {/* Municipality polygons */}
+            {FT_MUNIS.map((m) => {
+              const isSel = m.id === selectedId;
+              const isCmp = m.id === compareId;
+              const dim = !isSel && !isCmp && compareId !== null;
+              return (
+                <g key={m.id} style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    if (compareId === m.id) { setCompareId(null); return; }
+                    if (m.id !== selectedId && (window.event as MouseEvent | undefined)?.shiftKey) { setCompareId(m.id); return; }
+                    setSelectedId(m.id);
+                  }}>
+                  <path d={m.path}
+                    fill={isSel ? 'rgba(96,165,250,0.22)' : isCmp ? 'rgba(168,85,247,0.22)' : 'rgba(148,163,184,0.08)'}
+                    stroke={isSel ? '#60a5fa' : isCmp ? '#a855f7' : 'rgba(148,163,184,0.4)'}
+                    strokeWidth={isSel ? 1.5 : isCmp ? 1.3 : 0.6}
+                    opacity={dim ? 0.4 : 1}
+                    style={{ transition: 'all 0.3s' }} />
+
+                  {/* Layer-specific overlays per muni */}
+                  {layer === 'traffic' && (
+                    <g opacity={dim ? 0.3 : 1}>
+                      <rect x={m.cx - 14} y={m.cy - 7} width="28" height="13" rx="2"
+                        fill="rgba(11,18,32,0.85)" stroke={isSel ? '#fbbf24' : 'rgba(251,191,36,0.4)'} strokeWidth="0.7" />
+                      <text x={m.cx} y={m.cy + 2.5} fontFamily="JetBrains Mono,monospace" fontSize="7.5"
+                        fill={isSel ? '#fbbf24' : 'rgba(251,191,36,0.7)'} textAnchor="middle">
+                        {m.aadt}k AADT
+                      </text>
+                    </g>
+                  )}
+
+                  {layer === 'landuse' && isSel && (
+                    <g clipPath={`url(#ft-clip-${m.id})`}>
+                      {FT_PARCELS.map((p, i) => {
+                        const [dx, dy, w, h, cat] = p;
+                        return (
+                          <rect key={i}
+                            x={m.cx + (dx as number)} y={m.cy + (dy as number)}
+                            width={w as number} height={h as number}
+                            fill={FT_PARCEL_COLOR[cat as string]}
+                            opacity="0.78" rx="1" />
+                        );
+                      })}
+                    </g>
+                  )}
+
+                  {/* Emissions stacked-bar effect on muni edges (crash layer) */}
+                  {layer === 'crash' && (isSel || !compareId) && (
+                    <g opacity={isSel ? 1 : 0.4}>
+                      {(() => {
+                        const scale = emissionsScale(m.co2);
+                        const h = 4 + scale * 18;
+                        return (
+                          <g>
+                            <rect x={m.cx - 22} y={m.cy + 14} width="6" height={h * 0.7} fill="rgba(239,68,68,0.85)" />
+                            <rect x={m.cx - 14} y={m.cy + 14} width="6" height={h * 0.9} fill="rgba(251,146,60,0.85)" />
+                            <rect x={m.cx - 6}  y={m.cy + 14} width="6" height={h}        fill="rgba(250,204,21,0.85)" />
+                            <rect x={m.cx + 2}  y={m.cy + 14} width="6" height={h * 0.55} fill="rgba(99,102,241,0.85)" />
+                          </g>
+                        );
+                      })()}
+                    </g>
+                  )}
+                </g>
+              );
+            })}
+
+            {/* Clip paths for landuse parcels */}
+            <defs>
+              {FT_MUNIS.map((m) => (
+                <clipPath key={m.id} id={`ft-clip-${m.id}`}>
+                  <path d={m.path} />
+                </clipPath>
+              ))}
+            </defs>
+
+            {/* Crash density dots — animated */}
+            {layer === 'crash' && crashDots.map((d, i) => {
+              const pulse = 0.5 + 0.5 * Math.sin((tick + i * 6) * 0.12 + d.phase);
+              return (
+                <g key={i}>
+                  <circle cx={d.x} cy={d.y} r={4 + d.sev * 1.2} fill="url(#ft-crash-glow)" opacity={0.45 + pulse * 0.4} />
+                  <circle cx={d.x} cy={d.y} r={1 + d.sev * 0.35} fill="#ef4444" opacity={0.85} />
+                </g>
+              );
+            })}
+
+            {/* Selected muni label */}
+            <g filter="url(#ft-shadow)">
+              <rect x={muni.cx - 28} y={muni.cy - 30} width="56" height="14" rx="2"
+                fill="rgba(11,18,32,0.92)" stroke="#60a5fa" strokeWidth="0.8" />
+              <text x={muni.cx} y={muni.cy - 20.5} fontFamily="JetBrains Mono,monospace" fontSize="8"
+                fill="#60a5fa" textAnchor="middle" letterSpacing="0.5">
+                {muni.name.toUpperCase()}
+              </text>
+            </g>
+          </svg>
+
+          {/* Layer legend */}
+          <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between font-mono text-[8.5px]" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            {layer === 'traffic' && (
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1"><span className="w-3 h-0.5" style={{ background: '#fbbf24' }} /> truck route</span>
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm" style={{ background: 'rgba(251,191,36,0.4)', border: '1px solid #fbbf24' }} /> AADT badge</span>
+              </div>
+            )}
+            {layer === 'landuse' && (
+              <div className="flex items-center gap-3">
+                {Object.entries(FT_PARCEL_COLOR).map(([k, c]) => (
+                  <span key={k} className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm" style={{ background: c }} />{k === 'I' ? 'industrial' : k === 'C' ? 'commercial' : k === 'R' ? 'residential' : 'TCU'}</span>
+                ))}
+              </div>
+            )}
+            {layer === 'crash' && (
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full" style={{ background: '#ef4444' }} /> crash</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-2.5" style={{ background: '#ef4444' }} /> CO₂</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-2.5" style={{ background: '#fb923c' }} /> NOₓ</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-2.5" style={{ background: '#facc15' }} /> PM2.5</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-2.5" style={{ background: '#6366f1' }} /> HC</span>
+              </div>
+            )}
+            <span className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.35)' }}>shift+click → compare</span>
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="md:col-span-2 flex flex-col" style={{ minHeight: 380 }}>
+          {/* Layer toggle */}
+          <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-2" style={{ color: 'var(--text-muted)' }}>Analysis Level</div>
+            <div className="grid grid-cols-3 gap-1">
+              {(['traffic', 'landuse', 'crash'] as FTLayer[]).map((l, i) => (
+                <button key={l} onClick={() => setLayer(l)}
+                  className="font-mono text-[10px] py-1.5 rounded-md smooth"
+                  style={{
+                    background: layer === l ? 'var(--accent)' : 'var(--bg-elev)',
+                    color: layer === l ? 'var(--bg)' : 'var(--text-muted)',
+                    border: `1px solid ${layer === l ? 'var(--accent)' : 'var(--border-strong)'}`,
+                  }}
+                  data-hover>
+                  L{i + 1}
+                </button>
+              ))}
+            </div>
+            <div className="font-mono text-[10px] mt-2" style={{ color: 'var(--accent)' }}>{FT_LAYER_INFO[layer].label}</div>
+            <div className="font-mono text-[9px]" style={{ color: 'var(--text-faint)' }}>{FT_LAYER_INFO[layer].sub}</div>
+          </div>
+
+          {/* Muni selector */}
+          <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="font-mono text-[9px] uppercase tracking-[0.18em]" style={{ color: 'var(--text-muted)' }}>Municipality</div>
+              {compareId && (
+                <button onClick={() => setCompareId(null)}
+                  className="font-mono text-[9px] px-1.5 py-0.5 rounded"
+                  style={{ color: '#a855f7', border: '1px solid rgba(168,85,247,0.4)' }} data-hover>
+                  clear compare
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-1">
+              {FT_MUNIS.map((m) => {
+                const isSel = m.id === selectedId;
+                const isCmp = m.id === compareId;
+                return (
+                  <button key={m.id}
+                    onClick={(e) => {
+                      if (e.shiftKey && m.id !== selectedId) { setCompareId(isCmp ? null : m.id); return; }
+                      setSelectedId(m.id);
+                      if (isCmp) setCompareId(null);
+                    }}
+                    className="font-mono text-[10px] px-2 py-1.5 rounded smooth text-left"
+                    style={{
+                      background: isSel ? 'var(--accent-soft)' : isCmp ? 'rgba(168,85,247,0.15)' : 'var(--bg-elev)',
+                      color: isSel ? 'var(--accent)' : isCmp ? '#a855f7' : 'var(--text-muted)',
+                      border: `1px solid ${isSel ? 'var(--accent)' : isCmp ? '#a855f7' : 'var(--border)'}`,
+                    }}
+                    data-hover>
+                    {m.name}<span className="opacity-60"> · {m.county}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Metrics — change per layer */}
+          <div className="p-4 flex-1">
+            <div className="font-mono text-[9px] uppercase tracking-[0.18em] mb-2.5" style={{ color: 'var(--text-muted)' }}>
+              {muni.name}{compare && <span style={{ color: '#a855f7' }}> · vs {compare.name}</span>}
+            </div>
+            <div className="space-y-1.5 font-mono text-[11px]">
+              {layer === 'traffic' && (
+                <>
+                  <FTRow k="AADT (k veh/day)" a={muni.aadt} b={compare?.aadt} accent />
+                  <FTRow k="HCV share" a={`${muni.hcv}%`} b={compare ? `${compare.hcv}%` : undefined} />
+                  <FTRow k="Population" a={`${muni.pop}k`} b={compare ? `${compare.pop}k` : undefined} />
+                  <FTRow k="On NHFN" a={muni.hcv > 10 ? 'yes' : 'partial'} b={compare ? (compare.hcv > 10 ? 'yes' : 'partial') : undefined} />
+                </>
+              )}
+              {layer === 'landuse' && (
+                <>
+                  <FTRow k="Industrial" a={`${muni.industrialPct}%`} b={compare ? `${compare.industrialPct}%` : undefined} accent />
+                  <FTRow k="Commercial" a={`${muni.commercialPct}%`} b={compare ? `${compare.commercialPct}%` : undefined} />
+                  <FTRow k="Residential" a={`${muni.residentialPct}%`} b={compare ? `${compare.residentialPct}%` : undefined} />
+                  <FTRow k="TCU" a={`${muni.tcuPct}%`} b={compare ? `${compare.tcuPct}%` : undefined} />
+                  <div className="font-mono text-[9px] pt-2 leading-relaxed" style={{ color: 'var(--text-faint)' }}>
+                    Parcels clipped server-side via Shapely · {((muni.industrialPct + muni.commercialPct + muni.tcuPct) / 100 * muni.pop * 12).toFixed(0)}k freight-relevant ft²
+                  </div>
+                </>
+              )}
+              {layer === 'crash' && (
+                <>
+                  <FTRow k="2024 crashes" a={muni.crashes.toLocaleString()} b={compare ? compare.crashes.toLocaleString() : undefined} accent />
+                  <FTRow k="Noise (Lden)" a={`${muni.noise} dB`} b={compare ? `${compare.noise} dB` : undefined} />
+                  <FTRow k="CO₂ (mt/yr)" a={muni.co2.toLocaleString()} b={compare ? compare.co2.toLocaleString() : undefined} />
+                  <FTRow k="Crashes / 1k pop" a={(muni.crashes / muni.pop).toFixed(1)} b={compare ? (compare.crashes / compare.pop).toFixed(1) : undefined} />
+                  <div className="font-mono text-[9px] pt-2 leading-relaxed" style={{ color: 'var(--text-faint)' }}>
+                    EMME 6 species · IDOT 2024 records · noise quantiled to muni range
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FTRow({ k, a, b, accent }: { k: string; a: string | number; b?: string | number; accent?: boolean }) {
+  return (
+    <div className="flex items-center justify-between border-b py-1" style={{ borderColor: 'var(--border)' }}>
+      <span style={{ color: 'var(--text-muted)' }}>{k}</span>
+      <span className="flex items-center gap-2">
+        <span style={{ color: accent ? 'var(--accent)' : 'var(--text-primary)' }}>{a}</span>
+        {b !== undefined && <span style={{ color: '#a855f7' }}>· {b}</span>}
+      </span>
+    </div>
+  );
+}
+
 export function TerminalFallbackWidget({ project }: { project: Project }) {
   const lines = [
     `$ git clone ${project.github || 'https://github.com/Archit1706/' + project.slug}`,

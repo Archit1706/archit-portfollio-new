@@ -36,7 +36,7 @@ Every dynamic route follows the same server/client split: the `page.tsx` is an a
 
 ### Content sources
 
-**Projects** — hardcoded array in `lib/projects-data.ts`. Exports `Project` interface, `PROJECTS` (30 entries), and `PROJECT_BY_SLUG` (derived map). To add/edit a project, edit only `PROJECTS`.
+**Projects** — hardcoded array in `lib/projects-data.ts`. Exports `Project` interface, `PROJECTS` (31 entries), and `PROJECT_BY_SLUG` (derived map). To add/edit a project, edit only `PROJECTS`.
 
 **Blog posts** — Markdown files in `content/blogs/*.md`. Processed at request time by `lib/blog-utils.ts` using `gray-matter` + `remark` + `remark-gfm` + `remark-html`. Required frontmatter fields:
 

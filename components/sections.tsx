@@ -34,7 +34,7 @@ const TERMINAL_LINES = [
   { cmd: true,  text: 'whoami' },
   { cmd: false, text: 'archit rathod · ms cs · uic · chicago' },
   { cmd: true,  text: 'cat projects.txt | wc -l' },
-  { cmd: false, text: '30 shipped' },
+  { cmd: false, text: '31 shipped' },
   { cmd: true,  text: 'git log --oneline -3' },
   { cmd: false, text: '* galaxy morphology xai' },
   { cmd: false, text: '* greenpipe ci/cd agent' },
