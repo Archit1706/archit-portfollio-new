@@ -68,6 +68,14 @@ Heading IDs are injected automatically by `getPostBySlug`: `## My Section` becom
 
 All `generateMetadata()` functions import from here. `app/sitemap.ts` and `app/robots.ts` also consume `SITE_URL`.
 
+### Favicons
+
+`app/icon.tsx` (64×64) and `app/apple-icon.tsx` (180×180) generate the favicon at request time via `next/og`'s `ImageResponse` — Next auto-wires them; no `<link>` tags needed. Both render the "AR" monogram in JetBrains Mono on the accent green, matching the nav badge in `components/sections.tsx`.
+
+Two non-obvious constraints in Satori (the engine behind `ImageResponse`):
+1. **No `oklch()` or CSS custom properties** — the accent must be a static hex (`#3ecf8e` ≈ `oklch(0.72 0.15 152)`). The favicon does not react to the user's runtime `accentHue`.
+2. **Fonts must be loaded as ArrayBuffer** — both files fetch the Google Fonts CSS endpoint, regex out the woff URL, and fetch the binary. Hardcoded gstatic URLs break when Google rotates them.
+
 ### Theme system
 
 `components/theme-provider.tsx` is a React context that owns: `theme` (dark/light), `accentHue` (0–360), `showGrid`, `customCursor`, `ambientGlow`. State is persisted to `localStorage` (keys `ar-theme`, `ar-accent-hue`). The provider writes to `document.documentElement` class and CSS custom properties directly — **do not** apply theme classes elsewhere.
@@ -80,12 +88,18 @@ Accent color is always `oklch(0.72 0.15 <hue>)` — only the hue changes. Update
 
 ### Widget system
 
-Each project has a `widget` string key. `app/project/[slug]/page.tsx` contains `WIDGET_MAP` that maps every key to a React component. Two widget files:
+Each project has a `widget` string key (e.g. `osmMap`, `freightToolkit`). The map from key → component lives in `WIDGET_MAP` inside `app/project/[slug]/client.tsx`, not the server `page.tsx`. Components are loaded via `next/dynamic` through three thin helpers in that file — `pw()` (project-widgets), `cw()` (cli-widgets), `fl()` (fairlint) — each of which lazy-imports its target file and surfaces a shared `WidgetLoading` skeleton.
 
-- `components/widgets/project-widgets.tsx` — 10 bespoke SVG/animated widgets (osmMap, chatAgent, cycleGraph, panorama, tonePitch, urlScanner, pose, audioSent, network, auction) plus `TerminalFallbackWidget`
+Widget sources:
+- `components/widgets/project-widgets.tsx` — 16 bespoke SVG/animated widgets (osmMap, chatAgent, cycleGraph, panorama, tonePitch, urlScanner, pose, audioSent, network, auction, galaxyXai, greenPipe, fairLend, relfair, lattice, freightToolkit) plus `TerminalFallbackWidget` used as the default
 - `components/widgets/cli-widgets.tsx` — 14 terminal-style widgets sharing a `Term` wrapper and `useTypewriter` hook
+- `components/fairlint.tsx` — `FairLintProjectWidget` (mounted via `fl('FairLintProjectWidget')` for the `fairlintDl` key)
 
-All widgets accept `{ project: Project }` props to satisfy the `WidgetComponent` type in the detail page.
+Widget keys are camelCase strings and don't have to match the exported function name; the string passed to `pw()`/`cw()`/`fl()` is the function name to look up. All widgets accept `{ project: Project }` props.
+
+**Adding a new project that needs a custom widget**: (1) append the entry to `PROJECTS` in `lib/projects-data.ts` with a unique `widget` key, (2) export a new component from one of the three widget files, (3) register the key in `WIDGET_MAP`. Forgetting step 3 silently falls back to `TerminalFallbackWidget`.
+
+**Project count display**: most counts derive from `PROJECTS.length` automatically, but a few are hardcoded — the hero terminal line in `components/sections.tsx` (`TERMINAL_LINES`) and the CV's "At a Glance" stats + "view all N projects" link in `app/cv/client.tsx`. Update these when adding/removing projects.
 
 ### Cursor
 
