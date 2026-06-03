@@ -47,7 +47,21 @@ body {
   transition: background 0.6s var(--ease), color 0.6s var(--ease);
   overflow-x: hidden;
   cursor: none;
+  font-size: 17px;
+  line-height: 1.6;
 }
+
+/* ── Readability: bump up tiny / small font sizes ──────────────── */
+.text-xs { font-size: 13px; line-height: 1.55; }
+.text-sm { font-size: 15px; line-height: 1.6; }
+.text-base { font-size: 17px; line-height: 1.65; }
+
+/* Arbitrary pixel sizes used throughout the app — minimum legible floor */
+.text-\[10px\] { font-size: 12px; }
+.text-\[11px\] { font-size: 13px; }
+.text-\[12px\] { font-size: 13.5px; }
+.text-\[13px\] { font-size: 14.5px; }
+.text-\[14px\] { font-size: 15px; }
 @media (max-width: 900px) {
   body { cursor: auto; }
   .cursor-dot, .cursor-ring { display: none !important; }
@@ -188,7 +202,7 @@ a, button { cursor: none; }
   border-radius: 6px;
   border: 1px solid var(--border-strong);
   font-family: var(--font-jetbrains-mono), monospace;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.02em;
   color: var(--text-primary);
   background: var(--glass-bg);
@@ -293,7 +307,7 @@ a, button { cursor: none; }
 
 /* ── Blog prose ─────────────────────────────────────────────────── */
 .blog-prose {
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1.8;
   color: var(--text-primary);
 }
