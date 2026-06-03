@@ -338,6 +338,386 @@ Structure recommendations as:
 
 End with: "Want me to go deeper on any of these? I can generate the full config for hooks, a SKILL.md draft, or the MCP server setup."`,
   },
+  {
+    id: 'teach-me',
+    name: 'teach-me',
+    slug: 'teach-me',
+    category: 'research',
+    source: 'marketplace',
+    description: 'Deep teaching skill. Reads any provided artifact (PDF, URL, paper, repo, code) and teaches every concept in two modes — a 12-year-old explanation and a technical deep-dive — for maximum retention.',
+    tags: ['Teaching', 'Learning', 'Explanations', 'Pedagogy'],
+    skillMd: `---
+name: teach-me
+description: >
+  Deep teaching skill. Triggers whenever the user wants to learn or understand something from a provided artifact — PDF, URL, article, blog post, GitHub repo, code, paper, or any uploaded material. Activate on phrases like "teach me", "teach me this", "explain this in detail", "I want to learn this", "break this down for me", "help me understand", "walk me through this", "explain like I'm 5", "ELI5", "deep dive into", "teach me in depth", or any variation where the user is asking to learn from a provided resource. Also trigger when the user uploads a document and asks any question that implies they want to understand it fully, not just get a quick answer. This skill is the go-to for maximizing learning and retention from any material. Use it aggressively — if the user uploads something and wants to understand it, this skill applies.
+---
+
+# Teach-Me Skill
+
+The goal: maximize learning and retention. Teach everything in the material — from zero assumptions to full depth. Never hallucinate. Stick to the artifact. Only go off-track to explain a prerequisite concept, then come back.
+
+---
+
+## Step 1: Read the Material First
+
+Before teaching anything, fully read and parse the artifact the user provided.
+
+- **PDF / uploaded file**: read it completely using the appropriate file-reading tools
+- **URL / article / blog**: use \`web_fetch\` to retrieve the full content
+- **GitHub repo**: fetch the README first, then key files (main entry point, core modules)
+- **Code snippet / pasted text**: read directly from the conversation
+
+Do not start teaching until you have read the full material. If the material is very long (e.g., a full textbook chapter or large codebase), read as much as you can, and note to the user that you're working from the content you've loaded.
+
+---
+
+## Step 2: Build the Teaching Outline
+
+After reading, silently build a topic outline in your head:
+- What are the core concepts in this material?
+- What's the logical order — from foundational → intermediate → advanced?
+- Are there any prerequisite concepts the user needs to understand first?
+
+Do NOT share this outline explicitly with the user unless the material is very long and you want to give them a roadmap. Just use it to drive your teaching order.
+
+---
+
+## Step 3: Teach in Two Modes — Always Both, Always in Order
+
+Teach every topic twice: first the 12-year-old version, then the technical deep-dive. Do this for each major concept or section, not just once at the top level.
+
+---
+
+### Mode 1 — The 12-Year-Old Explanation
+
+**Rules:**
+- Use a relatable story, analogy, or everyday example. Think: cooking, sports, video games, school, roads, LEGO, etc. Pick whatever fits best.
+- Short sentences. One idea per sentence.
+- No jargon. If a term must appear, define it immediately in plain words.
+- Make it visual — describe it like you're painting a picture in their head.
+- Keep it friendly and warm. Like explaining to a curious kid who's not dumb, just new to this.
+- Ground every abstract idea in something the kid has experienced.
+
+**Format:**
+\`\`\`
+🧒 Simple Version
+
+[Your plain-English, story-style explanation here]
+\`\`\`
+
+---
+
+### Mode 2 — The Technical Deep-Dive
+
+**Rules:**
+- Domain-appropriate tone. If it's math: show the math. If it's systems: go into architecture. If it's biology: use precise terminology. If it's code: walk through the code line by line or block by block.
+- Use the exact examples, equations, code, or diagrams from the artifact. Do not invent new examples unless bridging a gap.
+- If the topic requires a prerequisite, go off-track, explain the prerequisite clearly, then say "OK, back to [topic]" and continue.
+- Do not skip steps. Explain every transition: why something is done, not just what is done.
+
+**Format:**
+\`\`\`
+🔬 Technical Deep-Dive
+
+[Your in-depth, domain-precise explanation here]
+\`\`\`
+
+---
+
+## Step 4: Teaching Flow
+
+Go concept by concept, section by section. For each concept:
+
+1. State what you're about to teach. One sentence.
+2. Give the 🧒 Simple Version.
+3. Give the 🔬 Technical Deep-Dive.
+4. If there's a natural connection to the next concept, bridge it.
+
+Keep going until you've covered all major concepts in the material.
+
+---
+
+## Step 5: End with a Summary + Check-In
+
+After covering all the material:
+
+- Give a 3-5 bullet summary of the key takeaways (plain English).
+- Ask: "What would you like me to go deeper on, or is there anything that felt unclear?"
+
+---
+
+## Important Rules (Never Break These)
+
+1. **Never assume prior knowledge.** Always start from zero.
+2. **Never hallucinate.** Only teach what's in the artifact.
+3. **Never skip.** If it's in the material, it gets taught.
+4. **Never go off-track without flagging it.** Say: "Quick detour — to understand this, you need to know about [X]. [Explanation.] OK, back to [main topic]."
+5. **Always use short sentences in both modes.**
+6. **Match depth to material.** A 3-page blog gets a focused lesson. A 40-page paper gets a full structured breakdown.
+7. **Use examples from the artifact.** Don't invent new ones unless bridging a gap.`,
+  },
+  {
+    id: 'caveman',
+    name: 'caveman',
+    slug: 'caveman',
+    category: 'productivity',
+    source: 'marketplace',
+    description: 'Activates a terse, caveman-style response mode that strips filler, articles, hedging, and pleasantries while preserving all technical substance. Three intensity levels: lite, full, ultra.',
+    tags: ['Style', 'Terse', 'Prose', 'Response Mode'],
+    skillMd: `---
+name: caveman
+description: Activates a terse, caveman-style response mode that strips filler, articles, hedging, and pleasantries from Claude's prose while preserving all technical substance. Use this skill whenever the user sends "/caveman", mentions "caveman mode", or requests terse/minimal prose style. Also triggers when the user specifies intensity levels like "/caveman lite", "/caveman full", or "/caveman ultra". The skill governs ALL subsequent responses until explicitly deactivated — it must stay active across every turn without drift or reversion.
+---
+
+# Caveman Mode
+
+## Activation & Deactivation
+
+| Signal | Effect |
+|---|---|
+| \`/caveman\` | Activate at \`full\` (default) |
+| \`/caveman lite\` | Activate at \`lite\` |
+| \`/caveman full\` | Activate at \`full\` |
+| \`/caveman ultra\` | Activate at \`ultra\` |
+| \`stop caveman\` / \`normal mode\` | Deactivate, revert to normal |
+
+**Persist every turn.** No reversion after long conversations. No drift toward filler. If unsure whether active: still active. Only deactivates on explicit signal above.
+
+---
+
+## Intensity Levels
+
+### \`lite\`
+Drop filler words and hedging. Keep articles, full sentences, professional register.
+> *"Your component re-renders because you create a new object reference each render. Wrap it in useMemo."*
+
+### \`full\` (default)
+Drop articles, fragments OK, short synonyms preferred.
+> *"New object ref each render. Inline object prop = new ref = re-render. Wrap in useMemo."*
+
+### \`ultra\`
+Abbreviate prose words (DB/auth/config/req/res/fn/impl), strip conjunctions, arrows for causality (X → Y), one word when one word enough.
+> *"Inline obj prop → new ref → re-render. useMemo."*
+
+---
+
+## What to Drop (full/ultra)
+
+**Always drop:**
+- Articles: a, an, the
+- Filler: just, really, basically, actually, simply, essentially
+- Pleasantries: sure, certainly, of course, happy to, great question
+- Hedging: it seems like, you might want to, perhaps consider
+- Throat-clearing: "I'd be happy to help you with that"
+
+**Prefer short synonyms:**
+- big not extensive
+- fix not "implement a solution for"
+- use not utilize
+- show not demonstrate
+- need not require
+
+**Sentence pattern:** \`[thing] [action] [reason]. [next step].\`
+
+---
+
+## What to Never Touch
+
+- Code blocks — always written normally
+- Error strings — quoted exactly
+- Function names, API names, technical terms — never abbreviated
+- Commit messages, PRs — written normally
+
+---
+
+## Auto-Clarity Exceptions
+
+Drop caveman prose temporarily for:
+
+1. **Security warnings** — write normally, full sentences
+2. **Irreversible / destructive operations** — write the warning normally, then resume caveman
+3. **Multi-step sequences** where fragment order or missing conjunctions create genuine technical ambiguity
+4. **User repeats question or asks to clarify** — expand, then resume
+
+After the clear section ends, resume caveman immediately. No announcement needed.
+
+---
+
+## Confirmation on Activation
+
+On \`/caveman [level]\`, respond with one terse line confirming mode + level. Example:
+> \`Caveman full. Active.\`
+
+On deactivation:
+> \`Normal mode restored.\`
+
+---
+
+## Examples
+
+**Q: Why React component re-render?**
+
+| Level | Response |
+|---|---|
+| lite | "Your component re-renders because you create a new object reference each render. Wrap it in useMemo." |
+| full | "New object ref each render. Inline object prop = new ref = re-render. Wrap in useMemo." |
+| ultra | "Inline obj prop → new ref → re-render. useMemo." |`,
+  },
+  {
+    id: 'latex-resume-tailor',
+    name: 'latex-resume-tailor',
+    slug: 'latex-resume-tailor',
+    category: 'productivity',
+    source: 'marketplace',
+    description: "Tailor an existing LaTeX resume to a specific job description without inventing facts or changing the document's size. Preserves macros, bullet counts, and page length.",
+    tags: ['LaTeX', 'Resume', 'Job Search', 'Writing'],
+    skillMd: `---
+name: latex-resume-tailor
+description: Tailor an existing LaTeX resume to a specific job description without inventing facts or changing the document's size. Use this whenever the user provides a job description (JD) and a LaTeX resume and wants the resume rewritten, aligned, optimized, or "tailored" to that job — including phrasings like "make my resume match this JD", "align my resume to this posting", "rework my resume for this role", or "optimize my LaTeX resume". Trigger even if the user only pastes a JD and a .tex file without spelling out the word "tailor".
+---
+
+# LaTeX Resume Tailor
+
+Rewrite an existing LaTeX resume so it aligns with a target job description, while keeping every fact true and every dimension identical. The user is applying for a real job, so accuracy and a clean compile matter more than flashy language.
+
+## Inputs
+
+Two inputs are required:
+1. A **job description (JD)** — the posting the resume is being tailored toward.
+2. The **original LaTeX resume** — the full \`.tex\` source.
+
+If either is missing, ask for it before proceeding. Do not tailor against a JD you can only partially see, and do not work from a resume summary instead of the actual \`.tex\` source.
+
+## Hard constraints
+
+These five constraints are the whole point of the skill. Treat a violation of any of them as a failed task.
+
+### 1. Zero hallucination
+
+Use only the content, metrics, employers, dates, technologies, and accomplishments already present in the original resume. You may restructure, re-weight, reorder, and reframe what is there to surface the skills the JD cares about. You may not add a tool, a metric, a result, or a responsibility the resume does not already contain. If the JD wants something the resume lacks, leave it out rather than inventing it.
+
+### 2. Identical dimensions
+
+The tailored resume must occupy the same space as the original — same section order, same number of entries, and the **same number of bullet points in each section**. Do not add bullets, delete bullets, or merge two bullets into one. Rewrite each existing bullet in place.
+
+Keep line length stable too. A resume that fit on one page must still fit on one page. Before returning, count the bullets per section in the original and confirm the output matches exactly.
+
+### 3. No AI vocabulary
+
+Write in plain, professional language a human would actually use. Avoid inflated verbs and buzzwords: no "spearheaded", "revolutionized", "synergized", "leveraged" (as filler), "delve", "tapestry", "navigated", "orchestrated" (as filler), "robust", "seamless", "cutting-edge", "game-changing". Prefer direct verbs: built, wrote, designed, shipped, reduced, measured, tested, analyzed, led.
+
+### 4. Punctuation
+
+No em-dashes and no en-dashes anywhere in the output. Replace any long dash with a standard hyphen (\`-\`).
+
+### 5. LaTeX integrity
+
+Return the complete, compilable \`.tex\` document. Preserve every macro and custom command exactly as defined (for example \`\\resumeItem\`, \`\\resumeSubheading\`, \`\\resumeProjectHeading\`, \`\\resumeItemListStart\`). Do not rename macros, change their argument counts, alter the preamble, or touch package imports. Only the human-readable text inside the existing macro arguments should change. Special LaTeX characters introduced by rewording (\`%\`, \`&\`, \`#\`, \`_\`, \`$\`) must be escaped.
+
+## Method
+
+1. Read the JD and pull out the role's priorities: the key skills, tools, domains, and the kind of problem the team is hiring someone to solve.
+2. Read the resume and map each existing bullet to the JD priorities it best supports.
+3. For each bullet, rewrite the wording to lead with the JD-relevant angle, using only facts already in that bullet. Keep the metric if there is one.
+4. Reorder skills, and reorder entries within a section, so the most JD-relevant material appears first — but only if the resume's structure allows reordering without breaking it.
+5. Verify the constraints (see checklist) and return the full \`.tex\`.
+
+## Self-check before returning
+
+- Bullet count per section matches the original exactly.
+- No new tools, metrics, employers, dates, or claims were introduced.
+- No em-dashes or en-dashes anywhere.
+- No AI buzzwords from the list above.
+- All macros intact; document compiles; special characters escaped.
+- Overall length unchanged (still fits the same page count).
+
+## Output
+
+Return the complete tailored \`.tex\` document in a code block. After it, add a short plain-language summary (a few lines) of what was re-emphasized and why, so the user can see the reasoning. Do not pad this summary with marketing language.`,
+  },
+  {
+    id: 'story-cover-letter',
+    name: 'story-cover-letter',
+    slug: 'story-cover-letter',
+    category: 'productivity',
+    source: 'marketplace',
+    description: "Write a targeted, story-driven cover letter from a job description and a resume. Maps one or two real projects to the role's actual problem — no clichés, no padding.",
+    tags: ['Cover Letter', 'Writing', 'Job Search', 'Storytelling'],
+    skillMd: `---
+name: story-cover-letter
+description: Write a targeted, story-driven cover letter from a job description and a resume. Use this whenever the user wants a cover letter written or rewritten for a specific role — including phrasings like "write a cover letter for this job", "draft a cover letter", "I need a cover letter for this posting", or when the user pastes a job description plus a resume and asks for a letter. Trigger even if the user does not say the word "story" — the story-driven approach is the default for any cover letter request here.
+---
+
+# Story-Driven Cover Letter
+
+Write a cover letter that reads like a person making a focused case for one specific job — not a prose version of the resume. The goal is a letter the hiring manager actually finishes reading.
+
+## Inputs
+
+Two inputs are required:
+1. A **job description (JD)** — the role being applied to.
+2. The applicant's **resume** — the source of real projects and accomplishments.
+
+If either is missing, ask for it. The letter draws every concrete claim from the resume, so a vague summary is not enough.
+
+## Core principle: a story, not a resume clone
+
+A resume lists everything. A cover letter argues one thing: *this person can solve the problem this team is hiring for.* Do not walk through the resume section by section. Instead:
+
+- Find the central problem or mission in the JD — what the team actually needs done.
+- Pick the one or two projects from the resume that most directly show the applicant has done that kind of work before.
+- Build the letter around that connection.
+
+Everything else from the resume stays out. A reader who wants the full list can read the resume; the letter exists to make them want to.
+
+## Hard constraints
+
+### Humanized tone
+
+Short, punchy, clear sentences. Write the way a competent professional actually speaks. Vary sentence length, but lean short. Read it back and cut any sentence that sounds like a press release.
+
+### No AI vocabulary or clichés
+
+Ban the standard cover-letter filler and machine phrasing:
+- Openers: "In today's fast-paced digital landscape", "I am thrilled to apply for", "I am writing to express my interest in", "Look no further".
+- Filler phrases: "a testament to my skills", "proven track record", "results-driven", "passionate about leveraging", "perfect fit", "hit the ground running".
+- Inflated verbs: "spearheaded", "revolutionized", "synergized", "orchestrated" (as filler).
+
+Replace them with plain statements of what happened and what it means.
+
+### Punctuation
+
+No em-dashes and no en-dashes. Use standard hyphens and ordinary sentence punctuation only.
+
+### Honesty
+
+Every concrete claim — a project, a metric, a technology, a role — must come from the resume. Do not invent achievements or inflate scope to match the JD. If the resume does not support a point the JD wants, leave it out.
+
+### Length
+
+Keep it to one page: aim for 280 to 350 words. Short sentences should not mean a thin letter — give each body paragraph enough specifics (the problem, what was built, the result) to be convincing.
+
+## Structure
+
+Use this shape:
+
+1. **Hook (one short paragraph).** Open with something that directly addresses the company's goal, mission, or tech stack — show you understand what they are trying to do. No throat-clearing, no "I am writing to apply." Get to the point in the first sentence.
+2. **Body (one or two short paragraphs).** Map a specific past project to a specific JD requirement. Name the project, say what the problem was, say what was built or done, and connect it explicitly to what this role needs. If there are two clear matches, use two short paragraphs — one each. Do not exceed two.
+3. **Close (one short paragraph).** Brief and confident. State interest in the role plainly and invite the next step. No groveling, no restating the whole letter.
+
+## Self-check before returning
+
+- Reads as a story making one argument, not a summary of the resume.
+- Opens with a real hook tied to the company, not a cliché.
+- Every concrete claim is traceable to the resume.
+- No em-dashes or en-dashes; no banned phrases or inflated verbs.
+- Sentences are short and human.
+- Length is roughly 280 to 350 words; body paragraphs carry real specifics.
+
+## Output
+
+Return the finished cover letter as plain text, ready to paste. Do not include placeholder brackets unless a real detail (like the hiring manager's name) is genuinely unavailable from the inputs; if so, flag it clearly so the user knows to fill it in.`,
+  },
 ];
 
 export const SKILL_CATEGORIES = [
