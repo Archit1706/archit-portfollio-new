@@ -70,11 +70,17 @@ All `generateMetadata()` functions import from here. `app/sitemap.ts` and `app/r
 
 ### Favicons
 
-`app/icon.tsx` (64×64) and `app/apple-icon.tsx` (180×180) generate the favicon at request time via `next/og`'s `ImageResponse` — Next auto-wires them; no `<link>` tags needed. Both render the "AR" monogram in JetBrains Mono on the accent green, matching the nav badge in `components/sections.tsx`.
+Two-part system:
 
-Two non-obvious constraints in Satori (the engine behind `ImageResponse`):
-1. **No `oklch()` or CSS custom properties** — the accent must be a static hex (`#3ecf8e` ≈ `oklch(0.72 0.15 152)`). The favicon does not react to the user's runtime `accentHue`.
-2. **Fonts must be loaded as ArrayBuffer** — both files fetch the Google Fonts CSS endpoint, regex out the woff URL, and fetch the binary. Hardcoded gstatic URLs break when Google rotates them.
+1. **`app/icon.tsx` (64×64) + `app/apple-icon.tsx` (180×180)** — server-rendered "AR" monogram via `next/og`'s `ImageResponse`. Auto-wired by Next; no `<link>` tags. Used for first paint, social previews, bookmarks, and iOS home screens. Color is baked at request time as a static hex (`#3ecf8e` ≈ `oklch(0.72 0.15 152)`).
+
+2. **`components/dynamic-favicon.tsx`** — mounted inside `ThemeProvider` in `app/layout.tsx`. After hydration it draws the "AR" mark on a canvas using the live `accentHue` + `theme` from context, exports a PNG data URL, and replaces every `<link rel="icon">` in the head. Re-runs whenever the tweaks panel changes hue or theme. This is what gives the visible tab icon its dynamic color.
+
+Non-obvious constraints in Satori (the engine behind `ImageResponse`):
+1. **No `oklch()` or CSS custom properties** — server icons must use a static hex.
+2. **Fonts must be loaded as ArrayBuffer** — both server files fetch the Google Fonts CSS endpoint, regex out the woff URL, and fetch the binary. Hardcoded gstatic URLs break when Google rotates them.
+
+In the dynamic client favicon, canvas `fillStyle` parses oklch unreliably across browsers, so the component resolves the color via a hidden DOM probe (`getComputedStyle(...).color`) before drawing.
 
 ### Theme system
 

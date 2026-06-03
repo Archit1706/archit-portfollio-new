@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { PageTransition } from '@/components/page-transition';
 import { CursorWrapper } from '@/components/cursor-wrapper';
+import { DynamicFavicon } from '@/components/dynamic-favicon';
 import { StarField } from '@/components/star-field';
 import { RootJsonLd } from '@/components/json-ld';
 import { SITE_URL, AUTHOR, DEFAULT_OG, KEYWORDS } from '@/lib/seo';
@@ -101,6 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${fraunces.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} dark`}
       >
         <ThemeProvider>
+          <DynamicFavicon />
           <StarField />
           <CursorWrapper />
           <PageTransition>{children}</PageTransition>
